@@ -4,7 +4,7 @@
 #include <conio.h>
 #include <time.h>
 
-void gotoXY(int x, int y)
+void gotoxy(int x, int y)
 {
   static HANDLE h = NULL;  
   if(!h)
@@ -21,7 +21,7 @@ void Nocursortype()
 	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &Info);
 }
 
-void set_color ( int code ) {
+void changeColor ( int code ) {
     HANDLE color = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute( color , code );
 }
@@ -74,10 +74,10 @@ struct point move[5] = {
 
 char moveGhost[4] = {'a', 'w', 'd', 's'};
 
-const int consoleWidth = 41;
-const int consoleHeight = 15;
+const int consoleWidth = 58;
+const int consoleHeight = 23;
 const int nFood = 300;
-int nGhost;
+int nGhost, choiceMode = 1;
 
 int score = 0, preScore = 0, timeGame = 0;
 bool loseGame = false, winGame = false, mark[105][105];
@@ -85,22 +85,39 @@ char buffer[105][105];
 
 // MAP
 
-char map[105][105] = {
-		"----------------------------------------",
-		"|  |                           |       |",
-		"|  |                           |       |",
-		"|      |                       |       |",
-		"|      |               |               |",
-		"|      |     |   |     |               |",
-		"|      |     |   |     |               |",
-		"|      -------   |     |               |",
-		"|                |     |               |",
-		"|                |     ---------       |",
-		"|                |             |       |",
-		"|-----------------                     |",
-		"|                                      |",
-		"----------------------------------------"
+char map[105][105];
+
+char map1[105][105] = {
+		{201, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205 ,187},
+		{186,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0, 178,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0, 178, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0, 186},
+		{186,   0,   0, 210,   0,   0, 174, 205, 205, 205, 205, 205, 205, 175,   0, 178,   0,   0, 178,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0, 178,   0, 178, 178,   0, 178,   0, 178, 178,   0, 178,   0,   0, 186},
+		{186,   0,   0, 186,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0,   0,   0, 178, 178, 178,   0,   0, 178, 178, 178, 178, 178,   0,   0, 178, 178, 178,   0,   0, 178, 178, 178,   0, 178,   0, 178, 178,   0, 178,   0,   0, 178,   0, 178,   0, 178, 186},
+		{204, 205, 205, 202, 205, 187,   0, 201, 205, 205, 205, 205, 205, 187,   0,   0,   0, 178,   0,   0, 178,   0,   0, 178, 178, 178,   0,   0, 178, 178, 178, 178, 178,   0,   0, 178, 178, 178,   0,   0, 178, 178, 178,   0,   0,   0, 178,   0,   0, 178, 178,   0, 178,   0, 178,   0,   0, 186},
+		{186,   0,   0,   0,   0, 186,   0, 186,   0,   0,   0,   0,   0, 186,   0, 178,   0,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0, 178,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0, 186},
+		{186,   0,   0,   0,   0, 186,   0, 186,   0,   0,   0,   0,   0, 186,   0, 178,   0,   0, 178,   0,   0, 178,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0,   0, 178,   0,   0, 178,   0, 178,   0, 178,   0, 178,   0, 178,   0,   0,   0,   0, 186},
+		{204, 205, 205, 205, 205, 188,   0, 200, 205, 205, 205, 205, 205, 188,   0,   0,   0,   0, 178,   0, 178,   0,   0,   0,   0,   0, 201, 205, 205, 176,   0, 176, 205, 205, 187,   0,   0,   0,   0,   0, 178,   0,   0,   0, 178,   0,   0, 178,   0,   0,   0,   0, 178,   0, 178, 178,   0, 186},
+		{186,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0, 178, 178,   0,   0,   0,   0,   0, 178,   0,   0,   0, 178,   0, 178,   0, 186,   0,   0,   0,   0,   0,   0,   0, 186,   0, 178,   0,   0, 178,   0, 178,   0,   0, 178,   0, 178,   0,   0, 178,   0, 178, 178,   0, 178, 178,   0, 186},
+		{186,   0, 178, 178,   0, 178, 178,   0,   0,   0, 178,   0,   0,   0, 178, 178,   0, 178, 178,   0,   0,   0, 178,   0,   0,   0, 186,   0,   0,   0,   0,   0,   0,   0, 186,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0, 178,   0, 178,   0,   0, 178,   0, 178,   0,   0, 186},
+		{186,   0, 178, 178,   0, 178, 178, 178,   0, 178, 178,   0, 178,   0, 178, 178,   0, 178,   0, 178,   0,   0,   0,   0, 178,   0, 186,   0,   0,   0,   0,   0,   0,   0, 186,   0,   0,   0, 178,   0,   0, 178,   0,   0, 178,   0, 178,   0,   0,   0,   0, 178,   0,   0, 178,   0,   0, 186},
+		{186,   0,   0,   0,   0,   0, 178, 178,   0, 178, 178,   0, 178,   0,   0,   0,   0, 178,   0, 178,   0,   0, 178,   0,   0,   0, 186,   0,   0,   0,   0,   0,   0,   0, 186,   0, 178,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0, 178,   0,   0, 178,   0, 178,   0, 178, 178, 178, 186},
+		{186,   0, 178,   0, 178,   0, 178, 178,   0,   0, 178,   0, 178,   0, 178, 178,   0, 178,   0,   0,   0,   0,   0,   0, 178,   0, 200, 205, 205, 205, 205, 205, 205, 205, 188,   0,   0,   0, 178, 178, 178,   0, 178,   0, 178,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 186},
+		{186,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0, 178,   0,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0, 178, 178,   0, 178,   0, 178,   0, 178, 178, 178, 186},
+		{186,   0,   0, 178,   0, 178, 178,   0, 178, 178, 178,   0, 178,   0, 178, 178,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0, 178, 178, 178, 178,   0, 178, 178, 178,   0,   0,   0,   0, 178,   0, 178,   0, 178, 178,   0, 178,   0,   0,   0, 178,   0,   0,   0,   0, 178,   0,   0, 186},
+		{186, 178,   0, 178,   0, 178,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0, 178,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0, 178,   0, 178, 178,   0, 178,   0, 178, 178,   0,   0,   0, 178, 178,   0, 178,   0, 178,   0, 178, 178,   0, 186},
+		{186,   0,   0, 178,   0, 178,   0, 178,   0, 178,   0,   0, 178,   0,   0, 178,   0, 178,   0,   0, 178, 178,   0, 178,   0, 178, 178, 178,   0, 178,   0, 178,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0, 178,   0,   0,   0, 178,   0,   0,   0,   0,   0, 186},
+		{186,   0,   0, 178,   0, 178,   0, 178,   0, 178, 178,   0,   0, 178,   0,   0,   0,   0, 178,   0,   0, 178,   0,   0,   0, 178,   0, 178,   0, 178,   0, 178,   0, 178,   0,   0,   0, 178,   0, 178, 178,   0, 178, 178,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0,   0, 178, 178, 186},
+		{186, 178,   0, 178,   0, 178,   0, 178,   0,   0, 178,   0,   0, 178,   0, 178,   0, 178,   0,   0, 178,   0,   0,   0,   0, 178,   0, 178,   0, 178,   0, 178,   0,   0,   0, 178,   0,   0,   0,   0,   0, 178, 178, 178,   0, 178,   0, 178, 178, 178, 178, 178,   0,   0,   0, 178, 178, 186},
+		{186,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0, 178,   0,   0, 178,   0, 178,   0, 178,   0, 178, 178, 178,   0,   0,   0, 178,   0, 178, 178, 178,   0,   0,   0, 178,   0,   0,   0, 178,   0,   0,   0, 178,   0,   0,   0, 186},
+		{186,   0, 178,  178,   0, 178, 178, 178, 178, 178,  0, 178,  0,  178, 178, 178, 178, 178,   0, 178,   0,   0, 178,   0,   0, 178,   0, 178, 178,   0,   0,   0, 178, 178,   0, 178,   0,   0,   0,   0,   0,   0,   0, 178, 178, 178, 178, 178,   0, 178,   0, 178, 178, 178, 178, 178,   0, 186},
+		{186,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178, 178, 178, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 186},				
+		{200, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205 ,188}
 	};
+
+void initMap() {
+	for (int i = 0; i < consoleHeight; ++i)
+		for (int j = 0; j < consoleWidth; ++j)
+			map[i][j] = map1[i][j];
+}
 
 void initBuffer() {
 	for (int i = 0; i < consoleHeight; ++i)
@@ -112,8 +129,8 @@ void initBuffer() {
 void initCharacter(struct character *pacman, struct character *ghost) {
 	// INIT PACMAN--------------------------------------------------
 
-	(*pacman).shape = 'O';
-	(*pacman).competitorShape = 'G';
+	(*pacman).shape = -108;
+	(*pacman).competitorShape = -114;
 	(*pacman).pos.x = 1;
 	(*pacman).pos.y = 1;
 	(*pacman).direct = STOP;	
@@ -121,8 +138,8 @@ void initCharacter(struct character *pacman, struct character *ghost) {
 	// INIT GHOST----------------------------------------------------
 	
 	for (int i = 0; i < nGhost; ++i) {
-		(*(ghost + i)).shape = 'G';
-		(*(ghost + i)).competitorShape = 'O';
+		(*(ghost + i)).shape = -114;
+		(*(ghost + i)).competitorShape = -108;
 		(*(ghost + i)).pos.x = consoleHeight - 3;
 		(*(ghost + i)).pos.y = consoleWidth - 3;
 		(*(ghost + i)).direct = STOP;
@@ -136,7 +153,7 @@ void initCharacter(struct character *pacman, struct character *ghost) {
 			x = rand() % consoleHeight;
 			y = rand() % consoleWidth;
 		}
-		while ((x == 1 && y == 1) || (x == consoleHeight && y == consoleWidth) || map[x][y] != ' ');
+		while ((x == 1 && y == 1) || (x == consoleHeight && y == consoleWidth) || map[x][y] != 0);
 		map[x][y] = '*';
 	}
 
@@ -150,42 +167,47 @@ void changeDirect(struct character *chacr, char key) {
 }
 
 void showBuffer() {
-	set_color(2);
-	for (int i = 0; i <= 15; ++i) {
-		for (int j = 0; j <= 39; ++j) {
-			if (buffer[i][j] == 'O') {
-				set_color(7);
+	changeColor(2);
+	int x = 30 , y = 0;
+	for (int i = 0; i <= consoleHeight; ++i) {
+		x = 30;
+		for (int j = 0; j <= consoleWidth; ++j) {
+			gotoxy(x, y);
+			if (buffer[i][j] == -108) {
+				changeColor(7);
 				putchar(buffer[i][j]);
-				set_color(2);
+				changeColor(2);
 			}
 			else
-				if (buffer[i][j] == 'G') {
-					set_color(9);
+				if (buffer[i][j] == -114) {
+					changeColor(9);
 					putchar(buffer[i][j]);
-					set_color(2);
+					changeColor(2);
 				}
 				else
 					putchar(buffer[i][j]);
+			++x;
 		}
+		++y;
 		putchar('\n');
 	}
 }
 
 void checkFood(struct character *chart) {
 	if (buffer[(*chart).pos.x + 1][(*chart).pos.y] == '*' && (*chart).direct == DOWN) {
-		map[(*chart).pos.x + 1][(*chart).pos.y] = ' ';
+		map[(*chart).pos.x + 1][(*chart).pos.y] = 0;
 		++score;
 	}
 	if (buffer[(*chart).pos.x - 1][(*chart).pos.y] == '*' && (*chart).direct == UP) {
-		map[(*chart).pos.x - 1][(*chart).pos.y] = ' ';
+		map[(*chart).pos.x - 1][(*chart).pos.y] = 0;
 		++score;
 	}
 	if (buffer[(*chart).pos.x][(*chart).pos.y + 1] == '*' && (*chart).direct == RIGHT) {
-		map[(*chart).pos.x][(*chart).pos.y + 1] = ' ';
+		map[(*chart).pos.x][(*chart).pos.y + 1] = 0;
 		++score;
 	}
 	if (buffer[(*chart).pos.x][(*chart).pos.y - 1] == '*' && (*chart).direct == LEFT) {
-		map[(*chart).pos.x][(*chart).pos.y - 1] = ' ';
+		map[(*chart).pos.x][(*chart).pos.y - 1] = 0;
 		++score;
 	}
 	if (score == nFood) winGame = true;
@@ -210,10 +232,10 @@ void checkTouchCompetitor(struct character *chart) {
 }
 
 void checkTouchWalls(struct character *chart) {
-	if (buffer[(*chart).pos.x + 1][(*chart).pos.y] != ' ' && buffer[(*chart).pos.x + 1][(*chart).pos.y] != '*' && (*chart).direct == DOWN) (*chart).direct = STOP;
-	if (buffer[(*chart).pos.x - 1][(*chart).pos.y] != ' ' && buffer[(*chart).pos.x - 1][(*chart).pos.y] != '*' && (*chart).direct == UP) (*chart).direct = STOP;
-	if (buffer[(*chart).pos.x][(*chart).pos.y + 1] != ' ' && buffer[(*chart).pos.x][(*chart).pos.y + 1] != '*' && (*chart).direct == RIGHT) (*chart).direct =  STOP;
-	if (buffer[(*chart).pos.x][(*chart).pos.y - 1] != ' ' && buffer[(*chart).pos.x][(*chart).pos.y - 1] != '*' && (*chart).direct == LEFT) (*chart).direct = STOP;
+	if (buffer[(*chart).pos.x + 1][(*chart).pos.y] != 0 && buffer[(*chart).pos.x + 1][(*chart).pos.y] != '*' && (*chart).direct == DOWN) (*chart).direct = STOP;
+	if (buffer[(*chart).pos.x - 1][(*chart).pos.y] != 0 && buffer[(*chart).pos.x - 1][(*chart).pos.y] != '*' && (*chart).direct == UP) (*chart).direct = STOP;
+	if (buffer[(*chart).pos.x][(*chart).pos.y + 1] != 0 && buffer[(*chart).pos.x][(*chart).pos.y + 1] != '*' && (*chart).direct == RIGHT) (*chart).direct =  STOP;
+	if (buffer[(*chart).pos.x][(*chart).pos.y - 1] != 0 && buffer[(*chart).pos.x][(*chart).pos.y - 1] != '*' && (*chart).direct == LEFT) (*chart).direct = STOP;
 }
 
 void solvePacman(struct character *pacman) {
@@ -257,6 +279,7 @@ void findPacman(struct character *ghost,struct character *pacman) {
 			trace[i][j].x = 0;
 			trace[i][j].y = 0;
 		}
+		
 	resetQueue();
 	struct point tmp, tmp1;
 	bool ok = false;
@@ -268,14 +291,14 @@ void findPacman(struct character *ghost,struct character *pacman) {
 	while (front <= back) {
 		tmp = queue[front];
 		pop();
-		if (buffer[tmp.x][tmp.y] == 'O') {
+		if (buffer[tmp.x][tmp.y] == -108) {
 			ok = true;
 			break;
 		}
 		for (int i = 1; i <= 4; ++i) {
 			tmp1.x = tmp.x + move[i].x;
 			tmp1.y = tmp.y + move[i].y;
-			if ((buffer[tmp1.x][tmp1.y] != ' ' && buffer[tmp1.x][tmp1.y] != '*' && buffer[tmp1.x][tmp1.y] != 'O') || mark[tmp1.x][tmp1.y]) continue;
+			if ((buffer[tmp1.x][tmp1.y] != 0 && buffer[tmp1.x][tmp1.y] != '*' && buffer[tmp1.x][tmp1.y] != -108) || mark[tmp1.x][tmp1.y]) continue;
 			mark[tmp1.x][tmp1.y] = true;
 			push(tmp1);
 			trace[tmp1.x][tmp1.y].x = tmp.x;
@@ -307,8 +330,12 @@ void modeEasy() {
 	// INIT--------------------------------------
 	srand(time(NULL));
 	nGhost = 3;
+	score = 0;
+	preScore = 0;
+	loseGame = winGame = false;
 	struct character pacman;
 	struct character ghosts[nGhost];
+	initMap();
 	initBuffer();
 	initCharacter(&pacman, &ghosts);
 	Nocursortype();
@@ -319,23 +346,42 @@ void modeEasy() {
 		
 		// CHECK ENDGAME-------------------------
 	
+	
 		if (loseGame == true) {	
 			system("cls");
-			set_color(4);
+			gotoxy(55,13);
+			changeColor(4);
 			printf("YOU LOSE !!!!\n");
+			int cnt = 0;
+			char tmp;
+			while (true) {
+				if (kbhit()) ++cnt;
+				tmp = _getch();
+				if (cnt == 2) break;
+			}
+			system("cls");
 			break;	
 		}
 		
 		if (winGame == true) {
 			system("cls");
-			set_color(4);
+			gotoxy(55,8);
+			changeColor(4);
 			printf("YOU WIN !!!!\n");
+			int cnt = 0;
+			char tmp;
+			while (true) {
+				if (kbhit()) ++cnt;
+				tmp = _getch();
+				if (cnt == 2) break;
+			}
+			system("cls");
 			break;
 		}
-		
+				
 		// CLEAR----------------------------------
 		
-		gotoXY(0,0);
+		gotoxy(47,0);
 		initBuffer();
 		
 		// SHOW-----------------------------------
@@ -350,7 +396,7 @@ void modeEasy() {
 		// CACULATE SCORE-------------------------
 		
 		if (score != preScore) {
-			set_color(rand() % 16);
+			changeColor(rand() % 16);
 			preScore = score;
 		}
 		printf("Score : %d", score * 100);
@@ -359,13 +405,27 @@ void modeEasy() {
 		
 		if (kbhit()) {
 			char key = _getch();
-			changeDirect(&pacman, key);
+			if (key == 32) {
+				while (true) {
+					if (kbhit()) {
+						key = _getch();
+						if (key == 32) break;
+					}
+				}
+			}
+				else 
+					if (key == 27) {
+						system("cls");
+						break;
+					}
+						else changeDirect(&pacman, key);
 		}
 		
-		timeGame %= 5;
-		if (timeGame == 0)
+		timeGame %= 10;
+		if (timeGame == 0) {
 			for (int i = 0; i < nGhost; ++i)
 				changeDirect(&ghosts[i], moveGhost[rand() % 4]);
+		}		
 		
 		// SOLVE----------------------------------
 		
@@ -381,17 +441,19 @@ void modeEasy() {
 		
 		// SYSTEM---------------------------------
 		++timeGame;
-		Sleep(100);
 	}
-	system("pause");
 }
 
 void modeHard() {
 	// INIT--------------------------------------
 	srand(time(NULL));
 	nGhost = 1;
+	score = 0;
+	preScore = 0;
+	loseGame = winGame = false;
 	struct character pacman;
 	struct character ghosts[nGhost];
+	initMap();
 	initBuffer();
 	initCharacter(&pacman, &ghosts);
 	Nocursortype();
@@ -401,24 +463,42 @@ void modeHard() {
 	while (true) {
 		
 		// CHECK ENDGAME-------------------------
-	
+		
 		if (loseGame == true) {	
 			system("cls");
-			set_color(4);
+			gotoxy(55,13);
+			changeColor(4);
 			printf("YOU LOSE !!!!\n");
+			int cnt = 0;
+			char tmp;
+			while (true) {
+				if (kbhit()) ++cnt;
+				tmp = _getch();
+				if (cnt == 2) break;
+			}
+			system("cls");
 			break;	
 		}
 		
 		if (winGame == true) {
 			system("cls");
-			set_color(4);
+			gotoxy(55,8);
+			changeColor(4);
 			printf("YOU WIN !!!!\n");
+			int cnt = 0;
+			char tmp;
+			while (true) {
+				if (kbhit()) ++cnt;
+				tmp = _getch();
+				if (cnt == 2) break;
+			}
+			system("cls");
 			break;
 		}
 		
 		// CLEAR----------------------------------
 		
-		gotoXY(0,0);
+		gotoxy(47,0);
 		initBuffer();
 		
 		// SHOW-----------------------------------
@@ -433,16 +513,30 @@ void modeHard() {
 		// CACULATE SCORE-------------------------
 		
 		if (score != preScore) {
-			set_color(rand() % 16);
+			changeColor(rand() % 16);
 			preScore = score;
 		}
 		printf("Score : %d", score * 100);
 		
+		
 		// CONTROL--------------------------------
 		
 		if (kbhit()) {
-			char key = _getch();
-			changeDirect(&pacman, key);
+				char key = _getch();
+				if (key == 32) {
+					while (true) {
+						if (kbhit()) {
+							key = _getch();
+							if (key == 32) break;
+						}
+					}
+				}
+					else 
+						if (key == 27) {
+							system("cls");
+							break;
+						}
+							else changeDirect(&pacman, key);
 		}
 		
 		for (int i = 0; i < nGhost; ++i)
@@ -462,17 +556,19 @@ void modeHard() {
 		
 		// SYSTEM---------------------------------
 		++timeGame;
-		Sleep(100);
 	}
-	system("pause");
 }
 
 void modeFaker() {
 	// INIT--------------------------------------
 	srand(time(NULL));
 	nGhost = 2;
+	score = 0;
+	preScore = 0;
+	loseGame = winGame = false;
 	struct character pacman;
 	struct character ghosts[nGhost];
+	initMap();
 	initBuffer();
 	initCharacter(&pacman, &ghosts);
 	Nocursortype();
@@ -485,20 +581,39 @@ void modeFaker() {
 	
 		if (loseGame == true) {	
 			system("cls");
-			set_color(4);
+			gotoxy(55,13);
+			changeColor(4);
 			printf("YOU LOSE !!!!\n");
+			int cnt = 0;
+			char tmp;
+			while (true) {
+				if (kbhit()) ++cnt;
+				tmp = _getch();
+				if (cnt == 2) break;
+			}
+			system("cls");
 			break;	
 		}
+		
 		if (winGame == true) {
 			system("cls");
-			set_color(4);
+			gotoxy(55,8);
+			changeColor(4);
 			printf("YOU WIN !!!!\n");
+			int cnt = 0;
+			char tmp;
+			while (true) {
+				if (kbhit()) ++cnt;
+				tmp = _getch();
+				if (cnt == 2) break;
+			}
+			system("cls");
 			break;
 		}
 		
 		// CLEAR----------------------------------
 		
-		gotoXY(0,0);
+		gotoxy(47,0);
 		initBuffer();
 		
 		// SHOW-----------------------------------
@@ -511,7 +626,7 @@ void modeFaker() {
 		showBuffer();
 		
 		if (score != preScore) {
-			set_color(rand() % 16);
+			changeColor(rand() % 16);
 			preScore = score;
 		}
 		printf("Score : %d", score * 100);
@@ -520,7 +635,20 @@ void modeFaker() {
 		
 		if (kbhit()) {
 			char key = _getch();
-			changeDirect(&pacman, key);
+			if (key == 32) {
+				while (true) {
+					if (kbhit()) {
+						key = _getch();
+						if (key == 32) break;
+					}
+				}
+			}
+				else 
+					if (key == 27) {
+						break;
+						system("cls");
+					}
+						else changeDirect(&pacman, key);
 		}
 	
 		timeGame %= 5;
@@ -548,9 +676,7 @@ void modeFaker() {
 		
 		// SYSTEM---------------------------------
 		++timeGame;
-		Sleep(100);
 	}
-	system("pause");
 }
 
 int main() {
@@ -586,5 +712,6 @@ int main() {
 				modeFaker();
 				
 			}
+	
 	return 0;
 }
