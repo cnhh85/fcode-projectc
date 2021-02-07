@@ -44,6 +44,7 @@ struct character {
 	char shape, competitorShape;
 	enum state direct;
 	struct point pos;
+	int color;
 };
 
 // BUILD QUEUE FOR FINDING PACMAN OF GHOST
@@ -76,7 +77,9 @@ char moveGhost[4] = {'a', 'w', 'd', 's'};
 
 const int consoleWidth = 58;
 const int consoleHeight = 23;
-const int nFood = 300;
+int speed = 100;
+int defaultColor = 2;
+int nFood = 300;
 int nGhost, choiceMode = 1;
 
 int score = 0, preScore = 0, timeGame = 0;
@@ -123,7 +126,6 @@ void initBuffer() {
 	for (int i = 0; i < consoleHeight; ++i)
 		for (int j = 0; j < consoleWidth; ++j)
 			buffer[i][j] = map[i][j];
-			
 }
 
 void initCharacter(struct character *pacman, struct character *ghost) {
@@ -133,7 +135,8 @@ void initCharacter(struct character *pacman, struct character *ghost) {
 	(*pacman).competitorShape = -114;
 	(*pacman).pos.x = 1;
 	(*pacman).pos.y = 1;
-	(*pacman).direct = STOP;	
+	(*pacman).direct = STOP;
+	(*pacman).color = 7;	
 	
 	// INIT GHOST----------------------------------------------------
 	
@@ -141,8 +144,9 @@ void initCharacter(struct character *pacman, struct character *ghost) {
 		(*(ghost + i)).shape = -114;
 		(*(ghost + i)).competitorShape = -108;
 		(*(ghost + i)).pos.x = consoleHeight - 3;
-		(*(ghost + i)).pos.y = consoleWidth - 3;
+		(*(ghost + i)).pos.y = consoleWidth - 2;
 		(*(ghost + i)).direct = STOP;
+		(*(ghost + i)).color = i + 3;
 	}
 	
 	// INIT FOOD----------------------------------------------------
@@ -166,26 +170,21 @@ void changeDirect(struct character *chacr, char key) {
 	if (key == 'd' || key == 'D' || key == 77) (*chacr).direct = RIGHT;
 }
 
+void showCharacter(struct character *chart) {
+	changeColor((*chart).color);
+	putchar((*chart).shape);
+	changeColor(defaultColor);
+}
+
 void showBuffer() {
-	changeColor(2);
-	int x = 30 , y = 0;
+	changeColor(defaultColor);
+	int x, y = 0;
 	for (int i = 0; i <= consoleHeight; ++i) {
 		x = 30;
 		for (int j = 0; j <= consoleWidth; ++j) {
 			gotoxy(x, y);
-			if (buffer[i][j] == -108) {
-				changeColor(7);
+			if (buffer[i][j] != -108 && buffer[i][j] != -114)
 				putchar(buffer[i][j]);
-				changeColor(2);
-			}
-			else
-				if (buffer[i][j] == -114) {
-					changeColor(9);
-					putchar(buffer[i][j]);
-					changeColor(2);
-				}
-				else
-					putchar(buffer[i][j]);
 			++x;
 		}
 		++y;
@@ -193,24 +192,27 @@ void showBuffer() {
 	}
 }
 
-void checkFood(struct character *chart) {
+void checkFood(struct character *chart, int *score) {
 	if (buffer[(*chart).pos.x + 1][(*chart).pos.y] == '*' && (*chart).direct == DOWN) {
 		map[(*chart).pos.x + 1][(*chart).pos.y] = 0;
-		++score;
+		buffer[(*chart).pos.x + 1][(*chart).pos.y] = 0;
+		++ *score;
 	}
 	if (buffer[(*chart).pos.x - 1][(*chart).pos.y] == '*' && (*chart).direct == UP) {
 		map[(*chart).pos.x - 1][(*chart).pos.y] = 0;
-		++score;
+		buffer[(*chart).pos.x + 1][(*chart).pos.y] = 0;
+		++ *score;
 	}
 	if (buffer[(*chart).pos.x][(*chart).pos.y + 1] == '*' && (*chart).direct == RIGHT) {
 		map[(*chart).pos.x][(*chart).pos.y + 1] = 0;
-		++score;
+		buffer[(*chart).pos.x + 1][(*chart).pos.y] = 0;
+		++ *score;
 	}
 	if (buffer[(*chart).pos.x][(*chart).pos.y - 1] == '*' && (*chart).direct == LEFT) {
 		map[(*chart).pos.x][(*chart).pos.y - 1] = 0;
-		++score;
+		buffer[(*chart).pos.x + 1][(*chart).pos.y] = 0;
+		++ *score;
 	}
-	if (score == nFood) winGame = true;
 }
 
 void checkTouchCompetitor(struct character *chart) {
@@ -238,11 +240,12 @@ void checkTouchWalls(struct character *chart) {
 	if (buffer[(*chart).pos.x][(*chart).pos.y - 1] != 0 && buffer[(*chart).pos.x][(*chart).pos.y - 1] != '*' && (*chart).direct == LEFT) (*chart).direct = STOP;
 }
 
-void solvePacman(struct character *pacman) {
+void solvePacman(struct character *pacman, int *score) {
 	
 	// CHECK EATING FOOD--------------------------------------------------------------------------
 	
-	checkFood(pacman);
+	checkFood(pacman, score);
+	if (*score == nFood) winGame = true;
 	
 	// CHECK TOUCHING GHOST-----------------------------------------------------------------------
 	
@@ -266,12 +269,28 @@ void solveGhost(struct character *ghost) {
 }
 
 void moveCharacter(struct character *chart) {
+	// DELETE OLD POSITION
+	
+	buffer[(*chart).pos.x][(*chart).pos.y] = map[(*chart).pos.x][(*chart).pos.y];
+	gotoxy(30 + (*chart).pos.y , (*chart).pos.x);
+	putchar(buffer[(*chart).pos.x][(*chart).pos.y]);
+	
+	// UPDATE POSITION
+	
 	(*chart).pos.x += move[(int) (*chart).direct].x;
 	(*chart).pos.y += move[(int) (*chart).direct].y;
+	
+	// SHOW NEW POSITION
+	
+	buffer[(*chart).pos.x][(*chart).pos.y] = (*chart).shape;
+	gotoxy(30 + (*chart).pos.y , (*chart).pos.x);
+	showCharacter(chart);
 }
 
 void findPacman(struct character *ghost,struct character *pacman) {
 	// INIT 
+	
+	if (buffer[(*pacman).pos.x][(*pacman).pos.y] == -114) return;
 	
 	for (int i = 0; i <= 99; ++i)
 		for (int j = 0; j <= 99; ++j) {
@@ -298,7 +317,7 @@ void findPacman(struct character *ghost,struct character *pacman) {
 		for (int i = 1; i <= 4; ++i) {
 			tmp1.x = tmp.x + move[i].x;
 			tmp1.y = tmp.y + move[i].y;
-			if ((buffer[tmp1.x][tmp1.y] != 0 && buffer[tmp1.x][tmp1.y] != '*' && buffer[tmp1.x][tmp1.y] != -108) || mark[tmp1.x][tmp1.y]) continue;
+			if ((buffer[tmp1.x][tmp1.y] != 0 && buffer[tmp1.x][tmp1.y] != '*' && buffer[tmp1.x][tmp1.y] != -108 && buffer[tmp1.x][tmp1.y] != -114) || mark[tmp1.x][tmp1.y]) continue;
 			mark[tmp1.x][tmp1.y] = true;
 			push(tmp1);
 			trace[tmp1.x][tmp1.y].x = tmp.x;
@@ -336,8 +355,17 @@ void modeEasy() {
 	struct character pacman;
 	struct character ghosts[nGhost];
 	initMap();
-	initBuffer();
 	initCharacter(&pacman, &ghosts);
+	initBuffer();
+	showBuffer();
+	buffer[pacman.pos.x][pacman.pos.y] = -108;
+	gotoxy(31,1);
+	showCharacter(&pacman);
+	for (int i = 0; i < nGhost; ++i) {
+		buffer[ghosts[i].pos.x][ghosts[i].pos.y] = -114;
+		gotoxy(30 + ghosts[i].pos.y, ghosts[i].pos.x);
+		showCharacter(&ghosts[i]);
+	}
 	Nocursortype();
 	
 	// RUN---------------------------------------
@@ -345,7 +373,6 @@ void modeEasy() {
 	while (true) {
 		
 		// CHECK ENDGAME-------------------------
-	
 	
 		if (loseGame == true) {	
 			system("cls");
@@ -378,23 +405,10 @@ void modeEasy() {
 			system("cls");
 			break;
 		}
-				
-		// CLEAR----------------------------------
-		
-		gotoxy(47,0);
-		initBuffer();
-		
-		// SHOW-----------------------------------
-		
-		buffer[pacman.pos.x][pacman.pos.y] = pacman.shape;
-		
-		for (int i = 0; i < nGhost; ++i)
-			buffer[ghosts[i].pos.x][ghosts[i].pos.y] = ghosts[i].shape; 
-			
-		showBuffer();
 		
 		// CACULATE SCORE-------------------------
 		
+		gotoxy(0,0);
 		if (score != preScore) {
 			changeColor(rand() % 16);
 			preScore = score;
@@ -429,18 +443,20 @@ void modeEasy() {
 		
 		// SOLVE----------------------------------
 		
-		solvePacman(&pacman);
+		solvePacman(&pacman , &score);
 		for (int i = 0; i < nGhost; ++i)
 			solveGhost(&ghosts[i]);
 		
 		// MOVE-----------------------------------
 		
+		gotoxy(47,0);
 		moveCharacter(&pacman);
 		for (int i = 0; i < nGhost; ++i)
 			moveCharacter(&ghosts[i]);
 		
 		// SYSTEM---------------------------------
 		++timeGame;
+		Sleep(speed);
 	}
 }
 
@@ -454,8 +470,17 @@ void modeHard() {
 	struct character pacman;
 	struct character ghosts[nGhost];
 	initMap();
-	initBuffer();
 	initCharacter(&pacman, &ghosts);
+	initBuffer();
+	showBuffer();
+	buffer[pacman.pos.x][pacman.pos.y] = -108;
+	gotoxy(31,1);
+	showCharacter(&pacman);
+	for (int i = 0; i < nGhost; ++i) {
+		buffer[ghosts[i].pos.x][ghosts[i].pos.y] = -114;
+		gotoxy(30 + ghosts[i].pos.y, ghosts[i].pos.x);
+		showCharacter(&ghosts[i]);
+	}
 	Nocursortype();
 	
 	// RUN---------------------------------------
@@ -463,7 +488,7 @@ void modeHard() {
 	while (true) {
 		
 		// CHECK ENDGAME-------------------------
-		
+	
 		if (loseGame == true) {	
 			system("cls");
 			gotoxy(55,13);
@@ -495,136 +520,10 @@ void modeHard() {
 			system("cls");
 			break;
 		}
-		
-		// CLEAR----------------------------------
-		
-		gotoxy(47,0);
-		initBuffer();
-		
-		// SHOW-----------------------------------
-		
-		buffer[pacman.pos.x][pacman.pos.y] = pacman.shape;
-		
-		for (int i = 0; i < nGhost; ++i)
-			buffer[ghosts[i].pos.x][ghosts[i].pos.y] = ghosts[i].shape; 
-			
-		showBuffer();
 		
 		// CACULATE SCORE-------------------------
 		
-		if (score != preScore) {
-			changeColor(rand() % 16);
-			preScore = score;
-		}
-		printf("Score : %d", score * 100);
-		
-		
-		// CONTROL--------------------------------
-		
-		if (kbhit()) {
-				char key = _getch();
-				if (key == 32) {
-					while (true) {
-						if (kbhit()) {
-							key = _getch();
-							if (key == 32) break;
-						}
-					}
-				}
-					else 
-						if (key == 27) {
-							system("cls");
-							break;
-						}
-							else changeDirect(&pacman, key);
-		}
-		
-		for (int i = 0; i < nGhost; ++i)
-				findPacman(&ghosts[i], &pacman);
-		
-		// SOLVE----------------------------------
-		
-		solvePacman(&pacman);
-		for (int i = 0; i < nGhost; ++i)
-			solveGhost(&ghosts[i]);
-		
-		// MOVE-----------------------------------
-		
-		moveCharacter(&pacman);
-		for (int i = 0; i < nGhost; ++i)
-			moveCharacter(&ghosts[i]);
-		
-		// SYSTEM---------------------------------
-		++timeGame;
-	}
-}
-
-void modeFaker() {
-	// INIT--------------------------------------
-	srand(time(NULL));
-	nGhost = 2;
-	score = 0;
-	preScore = 0;
-	loseGame = winGame = false;
-	struct character pacman;
-	struct character ghosts[nGhost];
-	initMap();
-	initBuffer();
-	initCharacter(&pacman, &ghosts);
-	Nocursortype();
-	
-	// RUN---------------------------------------
-	
-	while (true) {
-		
-		// CHECK ENDGAME-------------------------
-	
-		if (loseGame == true) {	
-			system("cls");
-			gotoxy(55,13);
-			changeColor(4);
-			printf("YOU LOSE !!!!\n");
-			int cnt = 0;
-			char tmp;
-			while (true) {
-				if (kbhit()) ++cnt;
-				tmp = _getch();
-				if (cnt == 2) break;
-			}
-			system("cls");
-			break;	
-		}
-		
-		if (winGame == true) {
-			system("cls");
-			gotoxy(55,8);
-			changeColor(4);
-			printf("YOU WIN !!!!\n");
-			int cnt = 0;
-			char tmp;
-			while (true) {
-				if (kbhit()) ++cnt;
-				tmp = _getch();
-				if (cnt == 2) break;
-			}
-			system("cls");
-			break;
-		}
-		
-		// CLEAR----------------------------------
-		
-		gotoxy(47,0);
-		initBuffer();
-		
-		// SHOW-----------------------------------
-		
-		buffer[pacman.pos.x][pacman.pos.y] = pacman.shape;
-		
-		for (int i = 0; i < nGhost; ++i)
-			buffer[ghosts[i].pos.x][ghosts[i].pos.y] = ghosts[i].shape; 
-			
-		showBuffer();
-		
+		gotoxy(0,0);
 		if (score != preScore) {
 			changeColor(rand() % 16);
 			preScore = score;
@@ -645,12 +544,126 @@ void modeFaker() {
 			}
 				else 
 					if (key == 27) {
-						break;
 						system("cls");
+						break;
 					}
 						else changeDirect(&pacman, key);
 		}
+		
+		for (int i = 0; i < nGhost; ++i)
+			findPacman(&ghosts[i], &pacman);
+				
+		// SOLVE----------------------------------
+		
+		solvePacman(&pacman , &score);
+		for (int i = 0; i < nGhost; ++i)
+			solveGhost(&ghosts[i]);
+		
+		// MOVE-----------------------------------
+		
+		gotoxy(47,0);
+		moveCharacter(&pacman);
+		for (int i = 0; i < nGhost; ++i)
+			moveCharacter(&ghosts[i]);
+		
+		// SYSTEM---------------------------------
+		
+		++timeGame;
+		Sleep(speed);
+	}
+}
+
+
+void modeFaker() {
+	// INIT--------------------------------------
+	srand(time(NULL));
+	nGhost = 2;
+	score = 0;
+	preScore = 0;
+	loseGame = winGame = false;
+	struct character pacman;
+	struct character ghosts[nGhost];
+	initMap();
+	initCharacter(&pacman, &ghosts);
+	initBuffer();
+	showBuffer();
+	buffer[pacman.pos.x][pacman.pos.y] = -108;
+	gotoxy(31,1);
+	showCharacter(&pacman);
+	for (int i = 0; i < nGhost; ++i) {
+		buffer[ghosts[i].pos.x][ghosts[i].pos.y] = -114;
+		gotoxy(30 + ghosts[i].pos.y, ghosts[i].pos.x);
+		showCharacter(&ghosts[i]);
+	}
+	Nocursortype();
 	
+	// RUN---------------------------------------
+	
+	while (true) {
+		
+		// CHECK ENDGAME-------------------------
+	
+		if (loseGame == true) {	
+			system("cls");
+			gotoxy(55,13);
+			changeColor(4);
+			printf("YOU LOSE !!!!\n");
+			int cnt = 0;
+			char tmp;
+			while (true) {
+				if (kbhit()) ++cnt;
+				tmp = _getch();
+				if (cnt == 2) break;
+			}
+			system("cls");
+			break;	
+		}
+		
+		if (winGame == true) {
+			system("cls");
+			gotoxy(55,8);
+			changeColor(4);
+			printf("YOU WIN !!!!\n");
+			int cnt = 0;
+			char tmp;
+			while (true) {
+				if (kbhit()) ++cnt;
+				tmp = _getch();
+				if (cnt == 2) break;
+			}
+			system("cls");
+			break;
+		}
+		
+		// CACULATE SCORE-------------------------
+		
+		gotoxy(0,0);
+		if (score != preScore) {
+			changeColor(rand() % 16);
+			preScore = score;
+		}
+		printf("Score : %d", score * 100);
+		
+		// CONTROL--------------------------------
+		
+		if (kbhit()) {
+			char key = _getch();
+			if (key == 32) {
+				while (true) {
+					if (kbhit()) {
+						key = _getch();
+						if (key == 32) break;
+					}
+				}
+			}
+				else 
+					if (key == 27) {
+						system("cls");
+						break;
+					}
+						else changeDirect(&pacman, key);
+		}
+		
 		timeGame %= 5;
 		if (timeGame == 0) {
 			for (int i = 0; i < nGhost; ++i)
@@ -662,22 +675,135 @@ void modeFaker() {
 		
 		// SOLVE----------------------------------
 		
-		solvePacman(&pacman);
-		
+		solvePacman(&pacman , &score);
 		for (int i = 0; i < nGhost; ++i)
 			solveGhost(&ghosts[i]);
 		
 		// MOVE-----------------------------------
 		
+		gotoxy(47,0);
 		moveCharacter(&pacman);
-		
 		for (int i = 0; i < nGhost; ++i)
 			moveCharacter(&ghosts[i]);
 		
 		// SYSTEM---------------------------------
 		++timeGame;
+		Sleep(speed);
 	}
 }
+
+
+void modeTwoplayers() {
+	// INIT--------------------------------------
+	srand(time(NULL));
+	nGhost = 1;
+	nFood = 300;
+	int scorePacman = 0 , prescorePacman = 0;
+	int scoreGhost = 0 , prescoreGhost = 0;
+	loseGame = winGame = false;
+	struct character pacman;
+	struct character ghosts[nGhost];
+	initMap();
+	initCharacter(&pacman, &ghosts);
+	initBuffer();
+	showBuffer();
+	buffer[pacman.pos.x][pacman.pos.y] = -108;
+	gotoxy(31,1);
+	showCharacter(&pacman);
+	for (int i = 0; i < nGhost; ++i) {
+		buffer[ghosts[i].pos.x][ghosts[i].pos.y] = -114;
+		gotoxy(30 + ghosts[i].pos.y, ghosts[i].pos.x);
+		showCharacter(&ghosts[i]);
+	}
+	Nocursortype();
+	
+	// RUN---------------------------------------
+	
+	while (true) {
+		
+		// CHECK ENDGAME-------------------------
+	
+		if (winGame == true) {
+			system("cls");
+			gotoxy(55,8);
+			changeColor(4);
+			if (scorePacman > scoreGhost)
+				printf("PACMAN WIN !!!!\n");
+			else
+				printf("GHOST WIN !!!!\n");
+			int cnt = 0;
+			char tmp;
+			while (true) {
+				if (kbhit()) ++cnt;
+				tmp = _getch();
+				if (cnt == 2) break;
+			}
+			system("cls");
+			break;
+		}
+		
+		// CACULATE SCORE-------------------------
+		
+		gotoxy(0,0);
+		if (scorePacman != prescorePacman) {
+			changeColor(rand() % 16);
+			prescorePacman = scorePacman;
+		}
+		printf("Pacman score : %d\n\n", scorePacman * 10);
+		
+		
+		changeColor(2);
+		if (scoreGhost != prescoreGhost) {
+			changeColor(rand() % 16);
+			prescoreGhost = scoreGhost;
+		}
+		printf("Pacman score : %d", scoreGhost * 10);
+		
+		// CONTROL--------------------------------
+		
+		if (kbhit()) {
+			char key = _getch();
+			if (key == 'w' || key == 'W' || key == 'a' || key == 'A' || key == 's' || key == 'S' || key == 'd' || key == 'D') {
+				changeDirect(&pacman, key);
+			}
+				else 
+					if (key == 32) {
+						while (true) {
+							if (kbhit()) {
+								key = _getch();
+								if (key == 32) break;
+							}
+						}
+					}
+						else 
+							if (key == 27) {
+								break;
+								system("cls");
+							}
+								else changeDirect(&ghosts[0], key);
+		}
+		
+		// SOLVE----------------------------------
+		
+		solvePacman(&pacman, &scorePacman);
+		
+		solvePacman(&ghosts[0], &scoreGhost);
+		
+		// MOVE-----------------------------------
+		
+		gotoxy(47,0);
+		moveCharacter(&pacman);
+		
+		for (int i = 0; i < nGhost; ++i)
+			moveCharacter(&ghosts[i]);
+		
+		
+		// SYSTEM---------------------------------
+		++timeGame;
+		Sleep(speed);
+	}
+}
+
 
 int main() {
 	
@@ -687,6 +813,7 @@ int main() {
 	printf("1.EASY\n");
 	printf("2.HARD\n");
 	printf("3.FAKER\n");
+	printf("4.TWO PLAYERS\n");
 	
 	char choice = _getch();
 	
@@ -705,13 +832,20 @@ int main() {
 			modeHard();
 			
 		}
-			else {
+			else 
+				if (choice == '3') {
 				
 				system("cls");
 				// FAKER MODE 
 				modeFaker();
 				
-			}
+				}
+					else  {
+						system("cls");
+						//TWO PLAYERS MODE
+						modeTwoplayers();
+						
+					}
 	
 	return 0;
 }
