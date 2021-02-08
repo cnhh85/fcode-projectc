@@ -44,7 +44,6 @@ struct character {
 	char shape, competitorShape;
 	enum state direct;
 	struct point pos;
-	int color;
 };
 
 // BUILD QUEUE FOR FINDING PACMAN OF GHOST
@@ -75,12 +74,11 @@ struct point move[5] = {
 
 char moveGhost[4] = {'a', 'w', 'd', 's'};
 
-const int consoleWidth = 58;
-const int consoleHeight = 23;
-int speed = 100;
-int defaultColor = 2;
+int consoleWidth;
+int consoleHeight;
 int nFood = 300;
 int nGhost, choiceMode = 1;
+int speed;
 
 int score = 0, preScore = 0, timeGame = 0;
 bool loseGame = false, winGame = false, mark[105][105];
@@ -89,37 +87,66 @@ char buffer[105][105];
 // MAP
 
 char map[105][105];
+struct point mapLen[2] = {
+	{33, 19},
+	{58, 23},
+};
 
-char map1[105][105] = {
-		{201, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205 ,187},
-		{186,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0, 178,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0, 178, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0, 186},
-		{186,   0,   0, 210,   0,   0, 174, 205, 205, 205, 205, 205, 205, 175,   0, 178,   0,   0, 178,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0, 178,   0, 178, 178,   0, 178,   0, 178, 178,   0, 178,   0,   0, 186},
-		{186,   0,   0, 186,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0,   0,   0, 178, 178, 178,   0,   0, 178, 178, 178, 178, 178,   0,   0, 178, 178, 178,   0,   0, 178, 178, 178,   0, 178,   0, 178, 178,   0, 178,   0,   0, 178,   0, 178,   0, 178, 186},
-		{204, 205, 205, 202, 205, 187,   0, 201, 205, 205, 205, 205, 205, 187,   0,   0,   0, 178,   0,   0, 178,   0,   0, 178, 178, 178,   0,   0, 178, 178, 178, 178, 178,   0,   0, 178, 178, 178,   0,   0, 178, 178, 178,   0,   0,   0, 178,   0,   0, 178, 178,   0, 178,   0, 178,   0,   0, 186},
-		{186,   0,   0,   0,   0, 186,   0, 186,   0,   0,   0,   0,   0, 186,   0, 178,   0,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0, 178,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0, 186},
-		{186,   0,   0,   0,   0, 186,   0, 186,   0,   0,   0,   0,   0, 186,   0, 178,   0,   0, 178,   0,   0, 178,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0,   0, 178,   0,   0, 178,   0, 178,   0, 178,   0, 178,   0, 178,   0,   0,   0,   0, 186},
-		{204, 205, 205, 205, 205, 188,   0, 200, 205, 205, 205, 205, 205, 188,   0,   0,   0,   0, 178,   0, 178,   0,   0,   0,   0,   0, 201, 205, 205, 176,   0, 176, 205, 205, 187,   0,   0,   0,   0,   0, 178,   0,   0,   0, 178,   0,   0, 178,   0,   0,   0,   0, 178,   0, 178, 178,   0, 186},
-		{186,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0, 178, 178,   0,   0,   0,   0,   0, 178,   0,   0,   0, 178,   0, 178,   0, 186,   0,   0,   0,   0,   0,   0,   0, 186,   0, 178,   0,   0, 178,   0, 178,   0,   0, 178,   0, 178,   0,   0, 178,   0, 178, 178,   0, 178, 178,   0, 186},
-		{186,   0, 178, 178,   0, 178, 178,   0,   0,   0, 178,   0,   0,   0, 178, 178,   0, 178, 178,   0,   0,   0, 178,   0,   0,   0, 186,   0,   0,   0,   0,   0,   0,   0, 186,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0, 178,   0, 178,   0,   0, 178,   0, 178,   0,   0, 186},
-		{186,   0, 178, 178,   0, 178, 178, 178,   0, 178, 178,   0, 178,   0, 178, 178,   0, 178,   0, 178,   0,   0,   0,   0, 178,   0, 186,   0,   0,   0,   0,   0,   0,   0, 186,   0,   0,   0, 178,   0,   0, 178,   0,   0, 178,   0, 178,   0,   0,   0,   0, 178,   0,   0, 178,   0,   0, 186},
-		{186,   0,   0,   0,   0,   0, 178, 178,   0, 178, 178,   0, 178,   0,   0,   0,   0, 178,   0, 178,   0,   0, 178,   0,   0,   0, 186,   0,   0,   0,   0,   0,   0,   0, 186,   0, 178,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0, 178,   0,   0, 178,   0, 178,   0, 178, 178, 178, 186},
-		{186,   0, 178,   0, 178,   0, 178, 178,   0,   0, 178,   0, 178,   0, 178, 178,   0, 178,   0,   0,   0,   0,   0,   0, 178,   0, 200, 205, 205, 205, 205, 205, 205, 205, 188,   0,   0,   0, 178, 178, 178,   0, 178,   0, 178,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 186},
-		{186,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0, 178,   0,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0, 178, 178,   0, 178,   0, 178,   0, 178, 178, 178, 186},
-		{186,   0,   0, 178,   0, 178, 178,   0, 178, 178, 178,   0, 178,   0, 178, 178,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0, 178, 178, 178, 178,   0, 178, 178, 178,   0,   0,   0,   0, 178,   0, 178,   0, 178, 178,   0, 178,   0,   0,   0, 178,   0,   0,   0,   0, 178,   0,   0, 186},
-		{186, 178,   0, 178,   0, 178,   0,   0,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0, 178,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0, 178,   0, 178, 178,   0, 178,   0, 178, 178,   0,   0,   0, 178, 178,   0, 178,   0, 178,   0, 178, 178,   0, 186},
-		{186,   0,   0, 178,   0, 178,   0, 178,   0, 178,   0,   0, 178,   0,   0, 178,   0, 178,   0,   0, 178, 178,   0, 178,   0, 178, 178, 178,   0, 178,   0, 178,   0, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0, 178,   0,   0,   0, 178,   0,   0,   0,   0,   0, 186},
-		{186,   0,   0, 178,   0, 178,   0, 178,   0, 178, 178,   0,   0, 178,   0,   0,   0,   0, 178,   0,   0, 178,   0,   0,   0, 178,   0, 178,   0, 178,   0, 178,   0, 178,   0,   0,   0, 178,   0, 178, 178,   0, 178, 178,   0,   0,   0,   0,   0, 178,   0,   0,   0,   0,   0, 178, 178, 186},
-		{186, 178,   0, 178,   0, 178,   0, 178,   0,   0, 178,   0,   0, 178,   0, 178,   0, 178,   0,   0, 178,   0,   0,   0,   0, 178,   0, 178,   0, 178,   0, 178,   0,   0,   0, 178,   0,   0,   0,   0,   0, 178, 178, 178,   0, 178,   0, 178, 178, 178, 178, 178,   0,   0,   0, 178, 178, 186},
-		{186,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178,   0, 178,   0,   0, 178,   0, 178,   0, 178,   0, 178, 178, 178,   0,   0,   0, 178,   0, 178, 178, 178,   0,   0,   0, 178,   0,   0,   0, 178,   0,   0,   0, 178,   0,   0,   0, 186},
-		{186,   0, 178,  178,   0, 178, 178, 178, 178, 178,  0, 178,  0,  178, 178, 178, 178, 178,   0, 178,   0,   0, 178,   0,   0, 178,   0, 178, 178,   0,   0,   0, 178, 178,   0, 178,   0,   0,   0,   0,   0,   0,   0, 178, 178, 178, 178, 178,   0, 178,   0, 178, 178, 178, 178, 178,   0, 186},
-		{186,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 178, 178, 178, 178,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 186},				
-		{200, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205 ,188}
-	};
 
-void initMap() {
+maps[5][105][105] = {
+		{ //33x19
+		{219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219}, //1
+		{219, ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', 219}, //2
+		{219, ' ', ' ', 178, ' ', 178, ' ', 178, 178, 178, 178, 178, 178, ' ', 178, ' ', 178, ' ', 178, ' ', 178, 178, 178, 178, 178, 178, ' ', 178, ' ', 178, ' ', ' ', 219}, //3
+		{219, 178, ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', 178, 219}, //4
+		{219, ' ', 178, 178, ' ', 178, ' ', 178, ' ', 178, ' ', 178, ' ', 178, 178, ' ', 178, ' ', 178, 178, ' ', 178, ' ', 178, ' ', 178, ' ', 178, ' ', 178, 178, ' ', 219}, //5
+		{219, ' ', ' ', ' ', ' ', 178, ' ', 178, ' ', 178, ' ', 178, ' ', 178, 178, ' ', 178, ' ', 178, 178, ' ', 178, ' ', 178, ' ', 178, ' ', 178, ' ', ' ', ' ', ' ', 219}, //6
+		{219, 177, ' ', 178, ' ', 178, ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', 178, ' ', 178, ' ', 177, 219}, //7
+		{219, ' ', ' ', ' ', ' ', 178, 178, 178, ' ', 178, ' ', 178, 178, ' ', 178, 178, 178, 178, 178, ' ', 178, 178, ' ', 178, ' ', 178, 178, 178, ' ', ' ', ' ', ' ', 219}, //8
+		{219, 177, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 177, 219}, //9
+		{219, ' ', ' ', 177, ' ', 177, 177, 177, 177, 177, 177, ' ', 178, 178, ' ', 178, 178, 178, ' ', 178, 178, ' ', 177, 177, 177, 177, 177, 177, ' ', 177, ' ', ' ', 219}, //10
+		{219, ' ', ' ', 177, ' ', 177, ' ', 177, ' ', 177, ' ', ' ', 178, 219, ' ', 178, 178, 178, ' ', 219, 178, ' ', ' ', 177, ' ', 177, ' ', 177, ' ', 177, ' ', ' ', 219}, //11
+		{219, ' ', 177, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 177, ' ', 219}, //12
+		{219, ' ', ' ', ' ', 177, ' ', 177, ' ', 177, 177, ' ', ' ', ' ', ' ', 173, ' ', 178, ' ', 173, ' ', ' ', ' ', ' ', 177, 177, ' ', 177, ' ', 177, ' ', ' ', ' ', 219}, //13
+		{219, ' ', ' ', 177, ' ', ' ', ' ', ' ', 177, ' ', ' ', 178, 178, ' ', ' ', ' ', 178, ' ', ' ', ' ', 178, 178, ' ', ' ', 177, ' ', ' ', ' ', ' ', 177, ' ', ' ', 219}, //14
+		{219, ' ', 177, ' ', ' ', 177, 177, ' ', 177, ' ', 178, 178, ' ', ' ', 178, ' ', 178, ' ', 178, ' ', ' ', 178, 178, ' ', 177, ' ', 177, 177, ' ', ' ', 177, ' ', 219}, //15
+		{219, ' ', 177, ' ', 177, ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', 178, 178, ' ', 178, ' ', 178, 178, ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', 177, ' ', 177, ' ', 219}, //16
+		{219, ' ', ' ', ' ', ' ', ' ', 177, ' ', 177, ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', 177, ' ', 177, ' ', ' ', ' ', ' ', ' ', 219}, //17
+		{219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219}  //19
+	},
+	{ //58x23
+		{219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219 ,219},
+		{219,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   219,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ', 178, 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 219},
+		{219,   ' ',   ' ', 219,   ' ',   ' ', 219, 219, 219, 219, 219, 219, 219, 219,   ' ', 178,   ' ',   ' ', 178,   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ', 178,   ' ', 178, 178,   ' ', 178,   ' ', 178, 178,   ' ', 178,   ' ',   ' ', 219},
+		{219,   ' ',   ' ', 219,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178, 178, 178,   ' ',   ' ', 178, 178, 178, 178, 178,   ' ',   ' ', 178, 178, 178,   ' ',   ' ', 178, 178, 178,   ' ', 178,   ' ', 178, 178,   ' ', 178,   ' ',   ' ', 178,   ' ', 178,   ' ', 178, 219},
+		{219, 219, 219, 219, 219, 219,   ' ', 219, 219, 219, 219, 219, 219, 219,   ' ',   ' ',   ' ', 178,   ' ',   ' ', 178,   ' ',   ' ', 178, 178, 178,   ' ',   ' ', 178, 178, 178, 178, 178,   ' ',   ' ', 178, 178, 178,   ' ',   ' ', 178, 178, 178,   ' ',   ' ',   ' ', 178,   ' ',   ' ', 178, 178,   ' ', 178,   ' ', 178,   ' ',   ' ', 219},
+		{219,  178,   178,   178,   178, 219,   ' ', 219,   178,   178,   178,   178,   178, 219,   ' ', 178,   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ', 219},
+		{219,  178,   178,   178,   178, 219,   ' ', 219,   178,   178,   178,   178,   178, 219,   ' ', 178,   ' ',   ' ', 178,   ' ',   ' ', 178,   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ', 178,   ' ',   ' ', 178,   ' ', 178,   ' ', 178,   ' ', 178,   ' ', 178,   ' ',   ' ',   ' ',   ' ', 219},
+		{219, 219, 219, 219, 219, 219,   ' ', 219, 219, 219, 219, 219, 219, 219,   ' ',   ' ',   ' ',   ' ', 178,   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ', 219, 219, 219, 176,   ' ', 176, 219, 219, 219,   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ', 178,   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ', 178,   ' ', 178, 178,   ' ', 219},
+		{219,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ', 178, 178,   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ', 178,   ' ', 178,   ' ', 219,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 219,   ' ', 178,   ' ',   ' ', 178,   ' ', 178,   ' ',   ' ', 178,   ' ', 178,   ' ',   ' ', 178,   ' ', 178, 178,   ' ', 178, 178,   ' ', 219},
+		{219,   ' ', 178, 178,   ' ', 178, 178,   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ', 178, 178,   ' ', 178, 178,   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ', 219,   ' ',  ' ',   219,   ' ',   219,   ' ',   ' ', 219,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ', 178,   ' ', 178,   ' ',   ' ', 178,   ' ', 178,   ' ',   ' ', 219},
+		{219,   ' ', 178, 178,   ' ', 178, 178, 178,   ' ', 178, 178,   ' ', 178,   ' ', 178, 178,   ' ', 178,   ' ', 178,   ' ',   ' ',   ' ',   ' ', 178,   ' ', ' ',   ' ',   ' ',   219,   ' ',   219,   ' ',   ' ', ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ', 178,   ' ',   ' ', 178,   ' ', 178,   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ', 178,   ' ',   ' ', 219},
+		{219,   ' ',   ' ',   ' ',   ' ',   ' ', 178, 178,   ' ', 178, 178,   ' ', 178,   ' ',   ' ',   ' ',   ' ', 178,   ' ', 178,   ' ',   ' ', 178,   ' ',   ' ',   ' ', 219,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 219,   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ', 178,   ' ',   ' ', 178,   ' ', 178,   ' ', 178, 178, 178, 219},
+		{219,   ' ', 178,   ' ', 178,   ' ', 178, 178,   ' ',   ' ', 178,   ' ', 178,   ' ', 178, 178,   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ', 219, 219, 219, 219, ' ', 219, 219, 219, 219,   ' ',   ' ',   ' ', 178, 178, 178,   ' ', 178,   ' ', 178,   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 219},
+		{219,   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ', 178,   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178, 178,   ' ', 178,   ' ', 178,   ' ', 178, 178, 178, 219},
+		{219,   ' ',   ' ', 178,   ' ', 178, 178,   ' ', 178, 178, 178,   ' ', 178,   ' ', 178, 178,   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178, 178, 178, 178,   ' ', 178, 178, 178,   ' ',   ' ',   ' ',   ' ', 178,   ' ', 178,   ' ', 178, 178,   ' ', 178,   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ', 219},
+		{219, 178,   ' ', 178,   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ', 178,   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ', 178,   ' ', 178, 178,   ' ', 178,   ' ', 178, 178,   ' ',   ' ',   ' ', 178, 178,   ' ', 178,   ' ', 178,   ' ', 178, 178,   ' ', 219},
+		{219,   ' ',   ' ', 178,   ' ', 178,   ' ', 178,   ' ', 178,   ' ',   ' ', 178,   ' ',   ' ', 178,   ' ', 178,   ' ',   ' ', 178, 178,   ' ', 178,   ' ', 178, 178, 178,   ' ', 178,   ' ', 178,   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ', 178,   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ', 219},
+		{219,   ' ',   ' ', 178,   ' ', 178,   ' ', 178,   ' ', 178, 178,   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ', 178,   ' ',   ' ',   ' ', 178,   ' ', 178,   ' ', 178,   ' ', 178,   ' ', 178,   ' ',   ' ',   ' ', 178,   ' ', 178, 178,   ' ', 178, 178,   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ', 178, 178, 219},
+		{219, 178,   ' ', 178,   ' ', 178,   ' ', 178,   ' ',   ' ', 178,   ' ',   ' ', 178,   ' ', 178,   ' ', 178,   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ', 178,   ' ', 178,   ' ', 178,   ' ', 178,   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ', 178, 178, 178,   ' ', 178,   ' ', 178, 178, 178, 178, 178,   ' ',   ' ',   ' ', 178, 178, 219},
+		{219,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178,   ' ', 178,   ' ',   ' ', 178,   ' ', 178,   ' ', 178,   ' ', 178, 178, 178,   ' ',   ' ',   ' ', 178,   ' ', 178, 178, 178,   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ', 178,   ' ',   ' ',   ' ', 219},
+		{219,   ' ', 178,  178,   ' ', 178, 178, 178, 178, 178,  ' ', 178,  ' ',  178, 178, 178, 178, 178,   ' ', 178,   ' ',   ' ', 178,   ' ',   ' ', 178,   ' ', 178, 178,   ' ',   ' ',   ' ', 178, 178,   ' ', 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178, 178, 178, 178, 178,   ' ', 178,   ' ', 178, 178, 178, 178, 178,   ' ', 219},
+		{219,   ' ',   ' ',   ' ',   ' ',   178,   ' ',   ' ',   ' ',   ' ',   ' ',' ',' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178, 178, 178, 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 219},				
+		{219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219 ,219}
+	},
+};
+
+void initMap(int mapIndex) {
+	consoleHeight = mapLen[mapIndex].y;
+	consoleWidth = mapLen[mapIndex].x;
 	for (int i = 0; i < consoleHeight; ++i)
 		for (int j = 0; j < consoleWidth; ++j)
-			map[i][j] = map1[i][j];
+			map[i][j] = maps[mapIndex][i][j];
 }
 
 void initBuffer() {
@@ -135,8 +162,7 @@ void initCharacter(struct character *pacman, struct character *ghost) {
 	(*pacman).competitorShape = -114;
 	(*pacman).pos.x = 1;
 	(*pacman).pos.y = 1;
-	(*pacman).direct = STOP;
-	(*pacman).color = 7;	
+	(*pacman).direct = STOP;	
 	
 	// INIT GHOST----------------------------------------------------
 	
@@ -144,9 +170,8 @@ void initCharacter(struct character *pacman, struct character *ghost) {
 		(*(ghost + i)).shape = -114;
 		(*(ghost + i)).competitorShape = -108;
 		(*(ghost + i)).pos.x = consoleHeight - 3;
-		(*(ghost + i)).pos.y = consoleWidth - 2;
+		(*(ghost + i)).pos.y = consoleWidth - 3;
 		(*(ghost + i)).direct = STOP;
-		(*(ghost + i)).color = i + 3;
 	}
 	
 	// INIT FOOD----------------------------------------------------
@@ -157,7 +182,7 @@ void initCharacter(struct character *pacman, struct character *ghost) {
 			x = rand() % consoleHeight;
 			y = rand() % consoleWidth;
 		}
-		while ((x == 1 && y == 1) || (x == consoleHeight && y == consoleWidth) || map[x][y] != 0);
+		while ((x == 1 && y == 1) || (x == consoleHeight && y == consoleWidth) || map[x][y] != ' ');
 		map[x][y] = '*';
 	}
 
@@ -170,21 +195,35 @@ void changeDirect(struct character *chacr, char key) {
 	if (key == 'd' || key == 'D' || key == 77) (*chacr).direct = RIGHT;
 }
 
-void showCharacter(struct character *chart) {
-	changeColor((*chart).color);
-	putchar((*chart).shape);
-	changeColor(defaultColor);
-}
-
 void showBuffer() {
-	changeColor(defaultColor);
-	int x, y = 0;
+	changeColor(2);
+	int x = 30 , y = 0;
 	for (int i = 0; i <= consoleHeight; ++i) {
 		x = 30;
 		for (int j = 0; j <= consoleWidth; ++j) {
 			gotoxy(x, y);
-			if (buffer[i][j] != -108 && buffer[i][j] != -114)
+			if (buffer[i][j] == -108) {
+				// CHANGE COLOR PACMAN
+				changeColor(7);
 				putchar(buffer[i][j]);
+				changeColor(2);
+			}
+			else
+				if (buffer[i][j] == -114) {
+					// CHANGE COLOR GHOST 
+					changeColor(rand() % 15);
+					putchar(buffer[i][j]);
+					changeColor(2);
+				}
+				else
+					if (buffer[i][j] == '*') {
+						// CHANGE COLOR FOOD ( WHITE)
+						changeColor(15);
+						putchar(buffer[i][j]);
+						changeColor(2);
+					}
+					else 
+						putchar(buffer[i][j]);
 			++x;
 		}
 		++y;
@@ -194,23 +233,19 @@ void showBuffer() {
 
 void checkFood(struct character *chart, int *score) {
 	if (buffer[(*chart).pos.x + 1][(*chart).pos.y] == '*' && (*chart).direct == DOWN) {
-		map[(*chart).pos.x + 1][(*chart).pos.y] = 0;
-		buffer[(*chart).pos.x + 1][(*chart).pos.y] = 0;
+		map[(*chart).pos.x + 1][(*chart).pos.y] = ' ';
 		++ *score;
 	}
 	if (buffer[(*chart).pos.x - 1][(*chart).pos.y] == '*' && (*chart).direct == UP) {
-		map[(*chart).pos.x - 1][(*chart).pos.y] = 0;
-		buffer[(*chart).pos.x + 1][(*chart).pos.y] = 0;
+		map[(*chart).pos.x - 1][(*chart).pos.y] = ' ';
 		++ *score;
 	}
 	if (buffer[(*chart).pos.x][(*chart).pos.y + 1] == '*' && (*chart).direct == RIGHT) {
-		map[(*chart).pos.x][(*chart).pos.y + 1] = 0;
-		buffer[(*chart).pos.x + 1][(*chart).pos.y] = 0;
+		map[(*chart).pos.x][(*chart).pos.y + 1] = ' ';
 		++ *score;
 	}
 	if (buffer[(*chart).pos.x][(*chart).pos.y - 1] == '*' && (*chart).direct == LEFT) {
-		map[(*chart).pos.x][(*chart).pos.y - 1] = 0;
-		buffer[(*chart).pos.x + 1][(*chart).pos.y] = 0;
+		map[(*chart).pos.x][(*chart).pos.y - 1] = ' ';
 		++ *score;
 	}
 }
@@ -234,10 +269,10 @@ void checkTouchCompetitor(struct character *chart) {
 }
 
 void checkTouchWalls(struct character *chart) {
-	if (buffer[(*chart).pos.x + 1][(*chart).pos.y] != 0 && buffer[(*chart).pos.x + 1][(*chart).pos.y] != '*' && (*chart).direct == DOWN) (*chart).direct = STOP;
-	if (buffer[(*chart).pos.x - 1][(*chart).pos.y] != 0 && buffer[(*chart).pos.x - 1][(*chart).pos.y] != '*' && (*chart).direct == UP) (*chart).direct = STOP;
-	if (buffer[(*chart).pos.x][(*chart).pos.y + 1] != 0 && buffer[(*chart).pos.x][(*chart).pos.y + 1] != '*' && (*chart).direct == RIGHT) (*chart).direct =  STOP;
-	if (buffer[(*chart).pos.x][(*chart).pos.y - 1] != 0 && buffer[(*chart).pos.x][(*chart).pos.y - 1] != '*' && (*chart).direct == LEFT) (*chart).direct = STOP;
+	if (buffer[(*chart).pos.x + 1][(*chart).pos.y] != ' ' && buffer[(*chart).pos.x + 1][(*chart).pos.y] != '*' && (*chart).direct == DOWN) (*chart).direct = STOP;
+	if (buffer[(*chart).pos.x - 1][(*chart).pos.y] != ' ' && buffer[(*chart).pos.x - 1][(*chart).pos.y] != '*' && (*chart).direct == UP) (*chart).direct = STOP;
+	if (buffer[(*chart).pos.x][(*chart).pos.y + 1] != ' ' && buffer[(*chart).pos.x][(*chart).pos.y + 1] != '*' && (*chart).direct == RIGHT) (*chart).direct =  STOP;
+	if (buffer[(*chart).pos.x][(*chart).pos.y - 1] != ' ' && buffer[(*chart).pos.x][(*chart).pos.y - 1] != '*' && (*chart).direct == LEFT) (*chart).direct = STOP;
 }
 
 void solvePacman(struct character *pacman, int *score) {
@@ -269,28 +304,12 @@ void solveGhost(struct character *ghost) {
 }
 
 void moveCharacter(struct character *chart) {
-	// DELETE OLD POSITION
-	
-	buffer[(*chart).pos.x][(*chart).pos.y] = map[(*chart).pos.x][(*chart).pos.y];
-	gotoxy(30 + (*chart).pos.y , (*chart).pos.x);
-	putchar(buffer[(*chart).pos.x][(*chart).pos.y]);
-	
-	// UPDATE POSITION
-	
 	(*chart).pos.x += move[(int) (*chart).direct].x;
 	(*chart).pos.y += move[(int) (*chart).direct].y;
-	
-	// SHOW NEW POSITION
-	
-	buffer[(*chart).pos.x][(*chart).pos.y] = (*chart).shape;
-	gotoxy(30 + (*chart).pos.y , (*chart).pos.x);
-	showCharacter(chart);
 }
 
 void findPacman(struct character *ghost,struct character *pacman) {
 	// INIT 
-	
-	if (buffer[(*pacman).pos.x][(*pacman).pos.y] == -114) return;
 	
 	for (int i = 0; i <= 99; ++i)
 		for (int j = 0; j <= 99; ++j) {
@@ -317,7 +336,7 @@ void findPacman(struct character *ghost,struct character *pacman) {
 		for (int i = 1; i <= 4; ++i) {
 			tmp1.x = tmp.x + move[i].x;
 			tmp1.y = tmp.y + move[i].y;
-			if ((buffer[tmp1.x][tmp1.y] != 0 && buffer[tmp1.x][tmp1.y] != '*' && buffer[tmp1.x][tmp1.y] != -108 && buffer[tmp1.x][tmp1.y] != -114) || mark[tmp1.x][tmp1.y]) continue;
+			if ((buffer[tmp1.x][tmp1.y] != ' ' && buffer[tmp1.x][tmp1.y] != '*' && buffer[tmp1.x][tmp1.y] != -108) || mark[tmp1.x][tmp1.y]) continue;
 			mark[tmp1.x][tmp1.y] = true;
 			push(tmp1);
 			trace[tmp1.x][tmp1.y].x = tmp.x;
@@ -350,22 +369,14 @@ void modeEasy() {
 	srand(time(NULL));
 	nGhost = 3;
 	score = 0;
+	speed = 100;
 	preScore = 0;
 	loseGame = winGame = false;
 	struct character pacman;
 	struct character ghosts[nGhost];
-	initMap();
-	initCharacter(&pacman, &ghosts);
+	initMap(0);
 	initBuffer();
-	showBuffer();
-	buffer[pacman.pos.x][pacman.pos.y] = -108;
-	gotoxy(31,1);
-	showCharacter(&pacman);
-	for (int i = 0; i < nGhost; ++i) {
-		buffer[ghosts[i].pos.x][ghosts[i].pos.y] = -114;
-		gotoxy(30 + ghosts[i].pos.y, ghosts[i].pos.x);
-		showCharacter(&ghosts[i]);
-	}
+	initCharacter(&pacman, &ghosts);
 	Nocursortype();
 	
 	// RUN---------------------------------------
@@ -373,6 +384,7 @@ void modeEasy() {
 	while (true) {
 		
 		// CHECK ENDGAME-------------------------
+	
 	
 		if (loseGame == true) {	
 			system("cls");
@@ -382,9 +394,11 @@ void modeEasy() {
 			int cnt = 0;
 			char tmp;
 			while (true) {
-				if (kbhit()) ++cnt;
-				tmp = _getch();
-				if (cnt == 2) break;
+				if (kbhit()) {
+					++cnt;
+					tmp = _getch();
+				}
+				if (cnt >= 2) break;
 			}
 			system("cls");
 			break;	
@@ -398,17 +412,32 @@ void modeEasy() {
 			int cnt = 0;
 			char tmp;
 			while (true) {
-				if (kbhit()) ++cnt;
-				tmp = _getch();
-				if (cnt == 2) break;
+				if (kbhit()) {
+					++cnt;
+					tmp = _getch();
+				}
+				if (cnt >= 2) break;
 			}
 			system("cls");
 			break;
 		}
+				
+		// CLEAR----------------------------------
+		
+		gotoxy(47,0);
+		initBuffer();
+		
+		// SHOW-----------------------------------
+		
+		buffer[pacman.pos.x][pacman.pos.y] = pacman.shape;
+		
+		for (int i = 0; i < nGhost; ++i)
+			buffer[ghosts[i].pos.x][ghosts[i].pos.y] = ghosts[i].shape; 
+			
+		showBuffer();
 		
 		// CACULATE SCORE-------------------------
 		
-		gotoxy(0,0);
 		if (score != preScore) {
 			changeColor(rand() % 16);
 			preScore = score;
@@ -449,7 +478,6 @@ void modeEasy() {
 		
 		// MOVE-----------------------------------
 		
-		gotoxy(47,0);
 		moveCharacter(&pacman);
 		for (int i = 0; i < nGhost; ++i)
 			moveCharacter(&ghosts[i]);
@@ -466,21 +494,13 @@ void modeHard() {
 	nGhost = 1;
 	score = 0;
 	preScore = 0;
+	speed = 0;
 	loseGame = winGame = false;
 	struct character pacman;
 	struct character ghosts[nGhost];
-	initMap();
-	initCharacter(&pacman, &ghosts);
+	initMap(1);
 	initBuffer();
-	showBuffer();
-	buffer[pacman.pos.x][pacman.pos.y] = -108;
-	gotoxy(31,1);
-	showCharacter(&pacman);
-	for (int i = 0; i < nGhost; ++i) {
-		buffer[ghosts[i].pos.x][ghosts[i].pos.y] = -114;
-		gotoxy(30 + ghosts[i].pos.y, ghosts[i].pos.x);
-		showCharacter(&ghosts[i]);
-	}
+	initCharacter(&pacman, &ghosts);
 	Nocursortype();
 	
 	// RUN---------------------------------------
@@ -488,7 +508,7 @@ void modeHard() {
 	while (true) {
 		
 		// CHECK ENDGAME-------------------------
-	
+		
 		if (loseGame == true) {	
 			system("cls");
 			gotoxy(55,13);
@@ -497,9 +517,11 @@ void modeHard() {
 			int cnt = 0;
 			char tmp;
 			while (true) {
-				if (kbhit()) ++cnt;
-				tmp = _getch();
-				if (cnt == 2) break;
+				if (kbhit()) {
+					++cnt;
+					tmp = _getch();
+				}
+				if (cnt >= 2) break;
 			}
 			system("cls");
 			break;	
@@ -513,88 +535,93 @@ void modeHard() {
 			int cnt = 0;
 			char tmp;
 			while (true) {
-				if (kbhit()) ++cnt;
-				tmp = _getch();
-				if (cnt == 2) break;
+				if (kbhit()) {
+					++cnt;
+					tmp = _getch();
+				}
+				if (cnt >= 2) break;
 			}
 			system("cls");
 			break;
 		}
 		
+		// CLEAR----------------------------------
+		
+		gotoxy(47,0);
+		initBuffer();
+		
+		// SHOW-----------------------------------
+		
+		buffer[pacman.pos.x][pacman.pos.y] = pacman.shape;
+		
+		for (int i = 0; i < nGhost; ++i)
+			buffer[ghosts[i].pos.x][ghosts[i].pos.y] = ghosts[i].shape; 
+			
+		showBuffer();
+		
 		// CACULATE SCORE-------------------------
 		
-		gotoxy(0,0);
 		if (score != preScore) {
 			changeColor(rand() % 16);
 			preScore = score;
 		}
 		printf("Score : %d", score * 100);
 		
+		
 		// CONTROL--------------------------------
 		
 		if (kbhit()) {
-			char key = _getch();
-			if (key == 32) {
-				while (true) {
-					if (kbhit()) {
-						key = _getch();
-						if (key == 32) break;
+				char key = _getch();
+				if (key == 32) {
+					while (true) {
+						if (kbhit()) {
+							key = _getch();
+							if (key == 32) break;
+						}
 					}
 				}
-			}
-				else 
-					if (key == 27) {
-						system("cls");
-						break;
-					}
-						else changeDirect(&pacman, key);
+					else 
+						if (key == 27) {
+							system("cls");
+							break;
+						}
+							else changeDirect(&pacman, key);
 		}
 		
 		for (int i = 0; i < nGhost; ++i)
-			findPacman(&ghosts[i], &pacman);
-				
+				findPacman(&ghosts[i], &pacman);
+		
 		// SOLVE----------------------------------
 		
-		solvePacman(&pacman , &score);
+		solvePacman(&pacman, &score);
 		for (int i = 0; i < nGhost; ++i)
 			solveGhost(&ghosts[i]);
 		
 		// MOVE-----------------------------------
 		
-		gotoxy(47,0);
 		moveCharacter(&pacman);
 		for (int i = 0; i < nGhost; ++i)
 			moveCharacter(&ghosts[i]);
 		
 		// SYSTEM---------------------------------
-		
 		++timeGame;
 		Sleep(speed);
 	}
 }
-
 
 void modeFaker() {
 	// INIT--------------------------------------
 	srand(time(NULL));
 	nGhost = 2;
 	score = 0;
+	speed = 0;
 	preScore = 0;
 	loseGame = winGame = false;
 	struct character pacman;
 	struct character ghosts[nGhost];
-	initMap();
-	initCharacter(&pacman, &ghosts);
+	initMap(1);
 	initBuffer();
-	showBuffer();
-	buffer[pacman.pos.x][pacman.pos.y] = -108;
-	gotoxy(31,1);
-	showCharacter(&pacman);
-	for (int i = 0; i < nGhost; ++i) {
-		buffer[ghosts[i].pos.x][ghosts[i].pos.y] = -114;
-		gotoxy(30 + ghosts[i].pos.y, ghosts[i].pos.x);
-		showCharacter(&ghosts[i]);
-	}
+	initCharacter(&pacman, &ghosts);
 	Nocursortype();
 	
 	// RUN---------------------------------------
@@ -611,9 +638,11 @@ void modeFaker() {
 			int cnt = 0;
 			char tmp;
 			while (true) {
-				if (kbhit()) ++cnt;
-				tmp = _getch();
-				if (cnt == 2) break;
+				if (kbhit()) {
+					++cnt;
+					tmp = _getch();
+				}
+				if (cnt >= 2) break;
 			}
 			system("cls");
 			break;	
@@ -627,17 +656,30 @@ void modeFaker() {
 			int cnt = 0;
 			char tmp;
 			while (true) {
-				if (kbhit()) ++cnt;
-				tmp = _getch();
-				if (cnt == 2) break;
+				if (kbhit()) {
+					++cnt;
+					tmp = _getch();
+				}
+				if (cnt >= 2) break;
 			}
 			system("cls");
 			break;
 		}
 		
-		// CACULATE SCORE-------------------------
+		// CLEAR----------------------------------
 		
-		gotoxy(0,0);
+		gotoxy(47,0);
+		initBuffer();
+		
+		// SHOW-----------------------------------
+		
+		buffer[pacman.pos.x][pacman.pos.y] = pacman.shape;
+		
+		for (int i = 0; i < nGhost; ++i)
+			buffer[ghosts[i].pos.x][ghosts[i].pos.y] = ghosts[i].shape; 
+			
+		showBuffer();
+		
 		if (score != preScore) {
 			changeColor(rand() % 16);
 			preScore = score;
@@ -658,12 +700,12 @@ void modeFaker() {
 			}
 				else 
 					if (key == 27) {
-						system("cls");
 						break;
+						system("cls");
 					}
 						else changeDirect(&pacman, key);
 		}
-		
+	
 		timeGame %= 5;
 		if (timeGame == 0) {
 			for (int i = 0; i < nGhost; ++i)
@@ -675,14 +717,15 @@ void modeFaker() {
 		
 		// SOLVE----------------------------------
 		
-		solvePacman(&pacman , &score);
+		solvePacman(&pacman, &score);
+		
 		for (int i = 0; i < nGhost; ++i)
 			solveGhost(&ghosts[i]);
 		
 		// MOVE-----------------------------------
 		
-		gotoxy(47,0);
 		moveCharacter(&pacman);
+		
 		for (int i = 0; i < nGhost; ++i)
 			moveCharacter(&ghosts[i]);
 		
@@ -692,29 +735,20 @@ void modeFaker() {
 	}
 }
 
-
 void modeTwoplayers() {
 	// INIT--------------------------------------
 	srand(time(NULL));
 	nGhost = 1;
 	nFood = 300;
+	speed = 0;
 	int scorePacman = 0 , prescorePacman = 0;
 	int scoreGhost = 0 , prescoreGhost = 0;
 	loseGame = winGame = false;
 	struct character pacman;
 	struct character ghosts[nGhost];
-	initMap();
-	initCharacter(&pacman, &ghosts);
+	initMap(0);
 	initBuffer();
-	showBuffer();
-	buffer[pacman.pos.x][pacman.pos.y] = -108;
-	gotoxy(31,1);
-	showCharacter(&pacman);
-	for (int i = 0; i < nGhost; ++i) {
-		buffer[ghosts[i].pos.x][ghosts[i].pos.y] = -114;
-		gotoxy(30 + ghosts[i].pos.y, ghosts[i].pos.x);
-		showCharacter(&ghosts[i]);
-	}
+	initCharacter(&pacman, &ghosts);
 	Nocursortype();
 	
 	// RUN---------------------------------------
@@ -734,17 +768,30 @@ void modeTwoplayers() {
 			int cnt = 0;
 			char tmp;
 			while (true) {
-				if (kbhit()) ++cnt;
-				tmp = _getch();
-				if (cnt == 2) break;
+				if (kbhit()) {
+					++cnt;
+					tmp = _getch();
+				}
+				if (cnt >= 2) break;
 			}
 			system("cls");
 			break;
 		}
 		
-		// CACULATE SCORE-------------------------
+		// CLEAR----------------------------------
 		
-		gotoxy(0,0);
+		gotoxy(47,0);
+		initBuffer();
+		
+		// SHOW-----------------------------------
+		
+		buffer[pacman.pos.x][pacman.pos.y] = pacman.shape;
+		
+		for (int i = 0; i < nGhost; ++i)
+			buffer[ghosts[i].pos.x][ghosts[i].pos.y] = ghosts[i].shape; 
+			
+		showBuffer();
+		
 		if (scorePacman != prescorePacman) {
 			changeColor(rand() % 16);
 			prescorePacman = scorePacman;
@@ -782,6 +829,8 @@ void modeTwoplayers() {
 							}
 								else changeDirect(&ghosts[0], key);
 		}
+	
+		
 		
 		// SOLVE----------------------------------
 		
@@ -791,19 +840,16 @@ void modeTwoplayers() {
 		
 		// MOVE-----------------------------------
 		
-		gotoxy(47,0);
 		moveCharacter(&pacman);
 		
 		for (int i = 0; i < nGhost; ++i)
 			moveCharacter(&ghosts[i]);
-		
 		
 		// SYSTEM---------------------------------
 		++timeGame;
 		Sleep(speed);
 	}
 }
-
 
 int main() {
 	
