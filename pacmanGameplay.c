@@ -336,7 +336,7 @@ void findPacman(struct character *ghost,struct character *pacman) {
 		for (int i = 1; i <= 4; ++i) {
 			tmp1.x = tmp.x + move[i].x;
 			tmp1.y = tmp.y + move[i].y;
-			if ((buffer[tmp1.x][tmp1.y] != ' ' && buffer[tmp1.x][tmp1.y] != '*' && buffer[tmp1.x][tmp1.y] != -108) || mark[tmp1.x][tmp1.y]) continue;
+			if ((buffer[tmp1.x][tmp1.y] != ' ' && buffer[tmp1.x][tmp1.y] != '*' && buffer[tmp1.x][tmp1.y] != -108 && buffer[tmp1.x][tmp1.y] != -114) || mark[tmp1.x][tmp1.y]) continue;
 			mark[tmp1.x][tmp1.y] = true;
 			push(tmp1);
 			trace[tmp1.x][tmp1.y].x = tmp.x;
