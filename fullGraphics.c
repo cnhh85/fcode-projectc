@@ -55,7 +55,7 @@ void intro(){
 		timeE=clock();
 	}while(timeE-timeS <= 219);
 	set_color("01;33");
-	int x = 30, y = 10;
+	int x = 5, y = 10;
 	gotoXY(x,y);    printf("PPPPPPPPPPPPPPPPP        AAA                  CCCCCCCCCCCCCMMMMMMMM               MMMMMMMM               AAA               NNNNNNNN        NNNNNNNN"); delay(500);
 	gotoXY(x,y + 1);printf("P::::::::::::::::P      A:::A              CCC::::::::::::CM:::::::M             M:::::::M              A:::A              N:::::::N       N::::::N");	delay(100);
 	gotoXY(x,y + 2);printf("P::::::PPPPPP:::::P    A:::::A           CC:::::::::::::::CM::::::::M           M::::::::M             A:::::A             N::::::::N      N::::::N");	delay(100);
@@ -234,6 +234,57 @@ void exitGame(int choiceMenu){
 	}
 	while (enterMenu != 13);
 }
+//setting
+void setting(int choiceMenu){
+	int enterMenu = 0, y = 18;
+	frame();	
+
+	gotoXY(67, y);
+	printf("|     SPEED      |");	
+	if(choiceMenu == 1)
+		changeColor(30);
+	gotoXY(69,y+1);
+	printf("[ 1 |");
+	changeColor(15);	
+	printf(" 2 | 3 ]");
+	if(choiceMenu == 2){
+		changeColor(71);
+		gotoXY(69, y + 1);
+		printf("[ 1 | 2 ");
+	}
+	changeColor(15);
+	if(choiceMenu == 3){
+		changeColor(95);	
+		gotoXY(69, y + 1);
+		printf("[ 1 |");
+		printf(" 2 ");
+		printf("| 3 ]");
+	}
+	changeColor(15);
+	do{
+		Nocursortype();
+		char c;
+		if(kbhit()){
+	        c = getch();
+	        if(c == 75 && choiceMenu > 1){
+	            choiceMenu --;
+	        }
+	        if(c == 77 && choiceMenu < 3){
+	            choiceMenu ++;
+	        }
+	        if(c == 13){
+	        	system("cls");
+	        	frame();
+	        	printMenuBanner();
+	        	printMenu(enterMenu);
+	        	enterMenu = 13;
+			}
+			setting(choiceMenu);
+		}
+	}
+	while (enterMenu != 13);
+}
+
 ///*MODE*///
 void mode(int choiceMenu){
 	int enterMenu = 0, y = 18;
@@ -276,6 +327,157 @@ void mode(int choiceMenu){
 	}
 	while (enterMenu != 13);
 }
+
+void play(int choiceMenu){
+	int enterMenu = 0, y = 18;
+	frame();	
+	if(choiceMenu == 1)
+		changeColor(30);
+	gotoXY(67, y);
+	printf("|       START       |");
+	changeColor(15);
+	if(choiceMenu == 2)
+		changeColor(71);
+	gotoXY(67, y + 1);
+	printf("|        MAP        |");
+	changeColor(15);
+	if(choiceMenu == 3)
+		changeColor(95);	
+	gotoXY(67, y + 2);
+	printf("|       SKIN        |");
+	changeColor(15);
+	do{
+		Nocursortype();
+		char c;
+		if(kbhit()){
+	        c = getch();
+	        if(c == 72 && choiceMenu > 1){
+	            choiceMenu --;
+	        }
+	        if(c == 80 && choiceMenu < 3){
+	            choiceMenu ++;
+	        }
+	        if(c == 13){
+	        	system("cls");
+	        	frame();
+	        	if(choiceMenu == 1){
+				}
+				if(choiceMenu == 2){
+					system("cls");
+					int num = 1;
+					map(num);
+				}
+				if(choiceMenu == 3){
+					system("cls");
+					int num = 1;
+					skin(num);
+				}
+			}
+			if(c == 27){
+				system("cls");
+				frame();
+	        	printMenuBanner();
+	        	printMenu(enterMenu);
+	        	enterMenu = 13;
+			}
+			play(choiceMenu);
+		}
+	}
+	while (enterMenu != 13);
+}
+
+void map(int choiceMenu){
+	int enterMenu = 0, y = 18;
+	frame();	
+	gotoXY(70, y);
+	printf("|     MAP     |");	
+	if(choiceMenu == 1){
+		gotoXY(75, y + 1);
+		printf("< 1 >");
+	}
+	if(choiceMenu == 2){
+		gotoXY(75, y + 1);
+		printf("< 2 >");
+	}
+	if(choiceMenu == 3){
+		gotoXY(75, y + 1);
+		printf("< 3 >");
+	}
+
+	changeColor(15);
+	do{
+		Nocursortype();
+		char c;
+		if(kbhit()){
+	        c = getch();
+	        if(c == 75 && choiceMenu > 1){
+	            choiceMenu --;
+	        }
+	        if(c == 77 && choiceMenu < 3){
+	            choiceMenu ++;
+	        }
+	        if(c == 13){
+	        	system("cls");
+	        	frame();
+	        	play(1);
+	        	enterMenu = 13;
+			}
+			map(choiceMenu);
+		}
+	}
+	while (enterMenu != 13);
+}
+
+
+void skin(int choiceMenu){
+	int enterMenu = 0, y = 18;
+	frame();	
+	gotoXY(70, y);
+	printf("|     SKIN     |");	
+	if(choiceMenu == 1){
+		gotoXY(75, y + 1);
+		printf("< 1 >");
+	}
+	if(choiceMenu == 2){
+		gotoXY(75, y + 1);
+		printf("< 2 >");
+	}
+	if(choiceMenu == 3){
+		gotoXY(75, y + 1);
+		printf("< 3 >");
+	}
+
+	changeColor(15);
+	do{
+		Nocursortype();
+		char c;
+		if(kbhit()){
+	        c = getch();
+	        if(c == 75 && choiceMenu > 1){
+	            choiceMenu --;
+	        }
+	        if(c == 77 && choiceMenu < 3){
+	            choiceMenu ++;
+	        }
+	        if(c == 13){
+	        	system("cls");
+	        	frame();
+	        	printMenuBanner();
+	        	printMenu(enterMenu);
+	        	enterMenu = 13;
+			}
+			if(c == 27){
+				system("cls");
+	        	frame();
+	        	play(1);
+			}
+			skin(choiceMenu);
+		}
+	}
+	while (enterMenu != 13);
+}
+
+
 //****MENU***///
 int printMenu(int choiceMenu){	
 	int enterMenu = 0, y = 18 ;
@@ -308,6 +510,9 @@ int printMenu(int choiceMenu){
 		    if(c == 13){
 		    	enterMenu = 13;
 				if(choiceMenu == 1){
+					system("cls");
+					int num = 1;
+					play(num);
 				}
 				if(choiceMenu == 2){
 					system("cls");
@@ -315,6 +520,9 @@ int printMenu(int choiceMenu){
 					mode(num);
 				}
 				if(choiceMenu == 3){
+					system("cls");
+					int num = 0;
+					setting(num);
 				}
 			}
 			if(c == 27){
@@ -379,7 +587,7 @@ void win(){
 
 int main(){
 	int choiceMenu = 0;
-	resizeConsole(1980, 1280);
+	resizeConsole(1280, 720);
 	Nocursortype();
 	intro();
 	Nocursortype();
