@@ -6,11 +6,11 @@
 
 void gotoxy(int x, int y)
 {
-  static HANDLE h = NULL;  
-  if(!h)
-    h = GetStdHandle(STD_OUTPUT_HANDLE);
-  COORD c = { x, y };  
-  SetConsoleCursorPosition(h,c);
+	static HANDLE h = NULL;  
+	if(!h)
+	h = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD c = { x, y };  
+	SetConsoleCursorPosition(h,c);
 }
 
 void Nocursortype()
@@ -78,7 +78,8 @@ int consoleWidth;
 int consoleHeight;
 int nFood = 300;
 int nGhost, choiceMode = 1;
-int speed;
+bool supperPacman = false;
+int speed, mapChoice;
 
 int score = 0, preScore = 0, timeGame = 0;
 bool loseGame = false, winGame = false, mark[105][105];
@@ -140,6 +141,11 @@ maps[5][105][105] = {
 		{219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219 ,219}
 	},
 };
+
+void setting(int mapIndextmp, int speedTmp) {
+	speed = speedTmp;
+	mapChoice = mapIndextmp;
+}
 
 void initMap(int mapIndex) {
 	consoleHeight = mapLen[mapIndex].y;
@@ -204,14 +210,15 @@ void showBuffer() {
 			gotoxy(x, y);
 			if (buffer[i][j] == -108) {
 				// CHANGE COLOR PACMAN
-				changeColor(7);
+				if (supperPacman) changeColor(5);
+					else changeColor(7);
 				putchar(buffer[i][j]);
 				changeColor(2);
 			}
 			else
 				if (buffer[i][j] == -114) {
 					// CHANGE COLOR GHOST 
-					changeColor(rand() % 15);
+					changeColor(9 + rand() % 4);
 					putchar(buffer[i][j]);
 					changeColor(2);
 				}
@@ -223,7 +230,13 @@ void showBuffer() {
 						changeColor(2);
 					}
 					else 
-						putchar(buffer[i][j]);
+						if (buffer[i][j] == 'F') {
+							changeColor(9 + rand() % 4);
+							putchar(buffer[i][j]);
+							changeColor(2);
+						}
+						else 
+							putchar(buffer[i][j]);
 			++x;
 		}
 		++y;
@@ -250,41 +263,144 @@ void checkFood(struct character *chart, int *score) {
 	}
 }
 
+void checkSupperfood(struct character *chart, int *score) {
+	if (buffer[(*chart).pos.x + 1][(*chart).pos.y] == 'F' && (*chart).direct == DOWN) {
+		supperPacman = true;
+		map[(*chart).pos.x + 1][(*chart).pos.y] = ' ';
+		++ *score;
+	}
+	if (buffer[(*chart).pos.x - 1][(*chart).pos.y] == 'F' && (*chart).direct == UP) {
+		supperPacman = true;
+		map[(*chart).pos.x - 1][(*chart).pos.y] = ' ';
+		++ *score;
+	}
+	if (buffer[(*chart).pos.x][(*chart).pos.y + 1] == 'F' && (*chart).direct == RIGHT) {
+		supperPacman = true;
+		map[(*chart).pos.x][(*chart).pos.y + 1] = ' ';
+		++ *score;
+	}
+	if (buffer[(*chart).pos.x][(*chart).pos.y - 1] == 'F' && (*chart).direct == LEFT) {
+		supperPacman = true;
+		map[(*chart).pos.x][(*chart).pos.y - 1] = ' ';
+		++ *score;
+	}
+}
+
 void checkTouchCompetitor(struct character *chart) {
 	if (buffer[(*chart).pos.x][(*chart).pos.y] == (*chart).competitorShape) {
+		if (supperPacman == true) {
+			if ((*chart).shape == -114) {
+				(*chart).pos.x = consoleHeight - 3;
+				(*chart).pos.y = consoleWidth - 3;
+			}
+		}
 		loseGame = true;
 	}
 	if (buffer[(*chart).pos.x + 1][(*chart).pos.y] == (*chart).competitorShape && (*chart).direct == DOWN) {
+		if (supperPacman == true) {
+			if ((*chart).shape == -114) {
+				(*chart).pos.x = consoleHeight - 3;
+				(*chart).pos.y = consoleWidth - 3;
+			}
+			return;
+		}
 		loseGame = true;
 	}
 	if (buffer[(*chart).pos.x - 1][(*chart).pos.y] == (*chart).competitorShape && (*chart).direct == UP) {
+		if (supperPacman == true) {
+			if ((*chart).shape == -114) {
+				(*chart).pos.x = consoleHeight - 3;
+				(*chart).pos.y = consoleWidth - 3;
+			}
+			return;
+		}
 		loseGame = true;
 	}
 	if (buffer[(*chart).pos.x][(*chart).pos.y + 1] == (*chart).competitorShape && (*chart).direct == RIGHT) {
+		if (supperPacman == true) {
+			if ((*chart).shape == -114) {
+				(*chart).pos.x = consoleHeight - 3;
+				(*chart).pos.y = consoleWidth - 3;
+			}
+			return;
+		}
 		loseGame = true;
 	}
 	if (buffer[(*chart).pos.x][(*chart).pos.y - 1] == (*chart).competitorShape && (*chart).direct == LEFT) {
+		if (supperPacman == true) {
+			if ((*chart).shape == -114) {
+				(*chart).pos.x = consoleHeight - 3;
+				(*chart).pos.y = consoleWidth - 3;
+			}
+			return;
+		}
 		loseGame = true;
+	}
+}
+
+void checkSupperpacmantouchghost(struct character *pacman, struct character *ghosts) {
+	if (buffer[(*pacman).pos.x][(*pacman).pos.y] == -114) {
+		for (int i = 0; i < nGhost; ++i)
+			if ((*(ghosts + i)).pos.x == (*pacman).pos.x && (*(ghosts + i)).pos.y == (*pacman).pos.y) {
+				(*(ghosts + i)).pos.x = consoleHeight - 3;
+				(*(ghosts + i)).pos.y = consoleWidth - 3;
+				return;
+			}
+	}
+	if (buffer[(*pacman).pos.x + 1][(*pacman).pos.y] == -114 && (*pacman).direct == DOWN) {
+		for (int i = 0; i < nGhost; ++i)
+			if ((*(ghosts + i)).pos.x == (*pacman).pos.x + 1 && (*(ghosts + i)).pos.y == (*pacman).pos.y) {
+				(*(ghosts + i)).pos.x = consoleHeight - 3;
+				(*(ghosts + i)).pos.y = consoleWidth - 3;
+				return;
+			}
+	}
+	if (buffer[(*pacman).pos.x - 1][(*pacman).pos.y] == -114 && (*pacman).direct == UP) {
+		for (int i = 0; i < nGhost; ++i)
+			if ((*(ghosts + i)).pos.x == (*pacman).pos.x - 1 && (*(ghosts + i)).pos.y == (*pacman).pos.y) {
+				(*(ghosts + i)).pos.x = consoleHeight - 3;
+				(*(ghosts + i)).pos.y = consoleWidth - 3;
+				return;
+			}
+	}
+	if (buffer[(*pacman).pos.x][(*pacman).pos.y + 1] == -114 && (*pacman).direct == RIGHT) {
+		for (int i = 0; i < nGhost; ++i)
+			if ((*(ghosts + i)).pos.x == (*pacman).pos.x && (*(ghosts + i)).pos.y == (*pacman).pos.y + 1) {
+				(*(ghosts + i)).pos.x = consoleHeight - 3;
+				(*(ghosts + i)).pos.y = consoleWidth - 3;
+				return;
+			}
+	}
+	if (buffer[(*pacman).pos.x][(*pacman).pos.y - 1] == -114 && (*pacman).direct == LEFT) {
+		for (int i = 0; i < nGhost; ++i)
+			if ((*(ghosts + i)).pos.x == (*pacman).pos.x && (*(ghosts + i)).pos.y == (*pacman).pos.y - 1) {
+				(*(ghosts + i)).pos.x = consoleHeight - 3;
+				(*(ghosts + i)).pos.y = consoleWidth - 3;
+				return;
+			}
 	}
 }
 
 void checkTouchWalls(struct character *chart) {
-	if (buffer[(*chart).pos.x + 1][(*chart).pos.y] != ' ' && buffer[(*chart).pos.x + 1][(*chart).pos.y] != '*' && (*chart).direct == DOWN) (*chart).direct = STOP;
-	if (buffer[(*chart).pos.x - 1][(*chart).pos.y] != ' ' && buffer[(*chart).pos.x - 1][(*chart).pos.y] != '*' && (*chart).direct == UP) (*chart).direct = STOP;
-	if (buffer[(*chart).pos.x][(*chart).pos.y + 1] != ' ' && buffer[(*chart).pos.x][(*chart).pos.y + 1] != '*' && (*chart).direct == RIGHT) (*chart).direct =  STOP;
-	if (buffer[(*chart).pos.x][(*chart).pos.y - 1] != ' ' && buffer[(*chart).pos.x][(*chart).pos.y - 1] != '*' && (*chart).direct == LEFT) (*chart).direct = STOP;
+	if (buffer[(*chart).pos.x + 1][(*chart).pos.y] != ' ' && buffer[(*chart).pos.x + 1][(*chart).pos.y] != '*' && buffer[(*chart).pos.x + 1][(*chart).pos.y] != 'F' && (*chart).direct == DOWN) (*chart).direct = STOP;
+	if (buffer[(*chart).pos.x - 1][(*chart).pos.y] != ' ' && buffer[(*chart).pos.x - 1][(*chart).pos.y] != '*' && buffer[(*chart).pos.x - 1][(*chart).pos.y] != 'F' && (*chart).direct == UP) (*chart).direct = STOP;
+	if (buffer[(*chart).pos.x][(*chart).pos.y + 1] != ' ' && buffer[(*chart).pos.x][(*chart).pos.y + 1] != '*' && buffer[(*chart).pos.x][(*chart).pos.y + 1] != 'F' &&(*chart).direct == RIGHT) (*chart).direct =  STOP;
+	if (buffer[(*chart).pos.x][(*chart).pos.y - 1] != ' ' && buffer[(*chart).pos.x][(*chart).pos.y - 1] != '*' && buffer[(*chart).pos.x][(*chart).pos.y - 1] != 'F' && (*chart).direct == LEFT) (*chart).direct = STOP;
 }
 
-void solvePacman(struct character *pacman, int *score) {
+void solvePacman(struct character *pacman, struct character *ghosts, int *score) {
 	
 	// CHECK EATING FOOD--------------------------------------------------------------------------
 	
 	checkFood(pacman, score);
+	checkSupperfood(pacman, score);
 	if (*score == nFood) winGame = true;
 	
 	// CHECK TOUCHING GHOST-----------------------------------------------------------------------
 	
-	checkTouchCompetitor(pacman);
+	
+	if (supperPacman == true) checkSupperpacmantouchghost(pacman, ghosts);
+	else checkTouchCompetitor(pacman);
 	
 	// CHECK TOUCHING WALLS-----------------------------------------------------------------------
 
@@ -323,37 +439,34 @@ void findPacman(struct character *ghost,struct character *pacman) {
 	bool ok = false;
 	tmp.x = (*ghost).pos.x;
 	tmp.y = (*ghost).pos.y;
-		
 	// BFS 
 	push(tmp);
 	while (front <= back) {
 		tmp = queue[front];
 		pop();
-		if (buffer[tmp.x][tmp.y] == -108) {
+		if (buffer[tmp.x][tmp.y] == (*pacman).shape) {
 			ok = true;
 			break;
 		}
 		for (int i = 1; i <= 4; ++i) {
 			tmp1.x = tmp.x + move[i].x;
 			tmp1.y = tmp.y + move[i].y;
-			if ((buffer[tmp1.x][tmp1.y] != ' ' && buffer[tmp1.x][tmp1.y] != '*' && buffer[tmp1.x][tmp1.y] != -108 && buffer[tmp1.x][tmp1.y] != -114) || mark[tmp1.x][tmp1.y]) continue;
+			if ((buffer[tmp1.x][tmp1.y] != 'F' && buffer[tmp1.x][tmp1.y] != ' ' && buffer[tmp1.x][tmp1.y] != '*' && buffer[tmp1.x][tmp1.y] != -114 && buffer[tmp1.x][tmp1.y] != (*pacman).shape) || mark[tmp1.x][tmp1.y]) continue;
 			mark[tmp1.x][tmp1.y] = true;
 			push(tmp1);
 			trace[tmp1.x][tmp1.y].x = tmp.x;
 			trace[tmp1.x][tmp1.y].y = tmp.y;
 		}
 	}
-	
 	if (ok == false) return;
-	
 	// TRACE
-	
 	tmp.x = (*pacman).pos.x;
 	tmp.y = (*pacman).pos.y;
 	while (true) {
 		if (trace[tmp.x][tmp.y].x == (*ghost).pos.x && trace[tmp.x][tmp.y].y == (*ghost).pos.y) break;
 		tmp = trace[tmp.x][tmp.y];
 	}
+	
 	char key;
 	if (tmp.x == (*ghost).pos.x - 1 && tmp.y == (*ghost).pos.y) key = 'w';
 	if (tmp.x == (*ghost).pos.x + 1 && tmp.y == (*ghost).pos.y) key = 's';
@@ -364,20 +477,22 @@ void findPacman(struct character *ghost,struct character *pacman) {
 	
 }
 
-void modeEasy() {
+void modeEasy(int mapIndexCus, int speedCus,bool custom) {
 	// INIT--------------------------------------
 	srand(time(NULL));
+	setting(0, 50);
+	if (custom) setting(mapIndexCus, speedCus);
 	nGhost = 3;
 	score = 0;
-	speed = 100;
 	preScore = 0;
 	loseGame = winGame = false;
 	struct character pacman;
 	struct character ghosts[nGhost];
-	initMap(0);
+	initMap(mapChoice);
 	initBuffer();
 	initCharacter(&pacman, &ghosts);
 	Nocursortype();
+	int xFood = -1, yFood = -1, timeSupperpacman = 0;
 	
 	// RUN---------------------------------------
 	
@@ -464,15 +579,14 @@ void modeEasy() {
 						else changeDirect(&pacman, key);
 		}
 		
-		timeGame %= 10;
-		if (timeGame == 0) {
+		if (timeGame % 3 == 0) {
 			for (int i = 0; i < nGhost; ++i)
 				changeDirect(&ghosts[i], moveGhost[rand() % 4]);
 		}		
 		
 		// SOLVE----------------------------------
 		
-		solvePacman(&pacman , &score);
+		solvePacman(&pacman , &ghosts, &score);
 		for (int i = 0; i < nGhost; ++i)
 			solveGhost(&ghosts[i]);
 		
@@ -483,25 +597,48 @@ void modeEasy() {
 			moveCharacter(&ghosts[i]);
 		
 		// SYSTEM---------------------------------
+		
+		
+		if (timeGame >= 20) {
+			if (supperPacman == true) ++timeSupperpacman;
+			if (timeSupperpacman == 70) {
+				supperPacman = false; 
+				timeSupperpacman = 0;
+			}
+			if (timeSupperpacman == false && timeGame % 50 == 0) {
+				++nFood;
+				if (xFood >= 0) map[xFood][yFood] = ' ';
+				while (true) {
+					xFood = rand() % consoleHeight;
+					yFood = rand() % consoleWidth;
+					if (buffer[xFood][yFood] == ' ') break;
+				}
+				map[xFood][yFood] = 'F';
+			}
+		}
+		
 		++timeGame;
+		timeGame %= 100;
 		Sleep(speed);
 	}
 }
 
-void modeHard() {
+void modeHard(int mapIndexCus, int speedCus,bool custom) {
 	// INIT--------------------------------------
 	srand(time(NULL));
+	setting(1, 50);
+	if (custom) setting(mapIndexCus, speedCus);
 	nGhost = 1;
 	score = 0;
 	preScore = 0;
-	speed = 0;
 	loseGame = winGame = false;
 	struct character pacman;
 	struct character ghosts[nGhost];
-	initMap(1);
+	initMap(mapChoice);
 	initBuffer();
 	initCharacter(&pacman, &ghosts);
 	Nocursortype();
+	int xFood = -1, yFood, timeSupperpacman = 0;
 	
 	// RUN---------------------------------------
 	
@@ -593,7 +730,7 @@ void modeHard() {
 		
 		// SOLVE----------------------------------
 		
-		solvePacman(&pacman, &score);
+		solvePacman(&pacman, &ghosts, &score);
 		for (int i = 0; i < nGhost; ++i)
 			solveGhost(&ghosts[i]);
 		
@@ -604,25 +741,46 @@ void modeHard() {
 			moveCharacter(&ghosts[i]);
 		
 		// SYSTEM---------------------------------
+		if (timeGame >= 20) {
+			if (supperPacman == true) ++timeSupperpacman;
+			if (timeSupperpacman == 70) {
+				supperPacman = false; 
+				timeSupperpacman = 0;
+			}
+			if (timeSupperpacman == false && timeGame % 50 == 0) {
+				++nFood;
+				if (xFood >= 0) map[xFood][yFood] = ' ';
+				while (true) {
+					xFood = rand() % consoleHeight;
+					yFood = rand() % consoleWidth;
+					if (buffer[xFood][yFood] == ' ') break;
+				}
+				map[xFood][yFood] = 'F';
+			}
+		}
+		
 		++timeGame;
+		timeGame %= 100;
 		Sleep(speed);
 	}
 }
 
-void modeFaker() {
+void modeFaker(int mapIndexCus, int speedCus,bool custom) {
 	// INIT--------------------------------------
 	srand(time(NULL));
+	setting(1, 0);
+	if (custom) setting(mapIndexCus, speedCus);
 	nGhost = 2;
 	score = 0;
-	speed = 0;
 	preScore = 0;
 	loseGame = winGame = false;
 	struct character pacman;
 	struct character ghosts[nGhost];
-	initMap(1);
+	initMap(mapChoice);
 	initBuffer();
 	initCharacter(&pacman, &ghosts);
 	Nocursortype();
+	int xFood = -1, yFood, timeSupperpacman;
 	
 	// RUN---------------------------------------
 	
@@ -717,7 +875,7 @@ void modeFaker() {
 		
 		// SOLVE----------------------------------
 		
-		solvePacman(&pacman, &score);
+		solvePacman(&pacman, &ghosts, &score);
 		
 		for (int i = 0; i < nGhost; ++i)
 			solveGhost(&ghosts[i]);
@@ -730,23 +888,43 @@ void modeFaker() {
 			moveCharacter(&ghosts[i]);
 		
 		// SYSTEM---------------------------------
+		if (timeGame >= 20) {
+			if (supperPacman == true) ++timeSupperpacman;
+			if (timeSupperpacman == 70) {
+				supperPacman = false; 
+				timeSupperpacman = 0;
+			}
+			if (timeSupperpacman == false && timeGame % 50 == 0) {
+				++nFood;
+				if (xFood >= 0) map[xFood][yFood] = ' ';
+				while (true) {
+					xFood = rand() % consoleHeight;
+					yFood = rand() % consoleWidth;
+					if (buffer[xFood][yFood] == ' ') break;
+				}
+				map[xFood][yFood] = 'F';
+			}
+		}
+		
 		++timeGame;
+		timeGame %= 100;
 		Sleep(speed);
 	}
 }
 
-void modeTwoplayers() {
+void modeTwoplayers(int mapIndexCus, int speedCus,bool custom) {
 	// INIT--------------------------------------
 	srand(time(NULL));
+	setting(0, 0);
+	if (custom) setting(mapIndexCus, speedCus);
 	nGhost = 1;
 	nFood = 300;
-	speed = 0;
 	int scorePacman = 0 , prescorePacman = 0;
 	int scoreGhost = 0 , prescoreGhost = 0;
 	loseGame = winGame = false;
 	struct character pacman;
 	struct character ghosts[nGhost];
-	initMap(0);
+	initMap(mapChoice);
 	initBuffer();
 	initCharacter(&pacman, &ghosts);
 	Nocursortype();
@@ -834,9 +1012,9 @@ void modeTwoplayers() {
 		
 		// SOLVE----------------------------------
 		
-		solvePacman(&pacman, &scorePacman);
+		solvePacman(&pacman, &ghosts, &scorePacman);
 		
-		solvePacman(&ghosts[0], &scoreGhost);
+		solvePacman(&ghosts[0], &ghosts, &scoreGhost);
 		
 		// MOVE-----------------------------------
 		
@@ -851,15 +1029,154 @@ void modeTwoplayers() {
 	}
 }
 
+void modeReverse(int mapIndexCus, int speedCus,bool custom) {
+	// INIT--------------------------------------
+	srand(time(NULL));
+	setting(0, 1);
+	if (custom) setting(mapIndexCus, speedCus);
+	nGhost = 1;
+	score = 0;
+	preScore = 0;
+	loseGame = winGame = false;
+	struct character pacman;
+	struct character ghosts[nGhost];
+	initMap(mapChoice);
+	initBuffer();
+	initCharacter(&pacman, &ghosts);
+	Nocursortype();
+	int x, y;
+	
+	// RUN---------------------------------------
+	
+	while (true) {
+		
+		// CHECK ENDGAME-------------------------
+		
+		if (winGame == true) {	
+			system("cls");
+			gotoxy(55,13);
+			changeColor(4);
+			printf("YOU LOSE !!!!\n");
+			int cnt = 0;
+			char tmp;
+			while (true) {
+				if (kbhit()) {
+					++cnt;
+					tmp = _getch();
+				}
+				if (cnt >= 2) break;
+			}
+			system("cls");
+			break;	
+		}
+		
+		if (loseGame == true) {
+			system("cls");
+			gotoxy(55,8);
+			changeColor(4);
+			printf("YOU WIN !!!!\n");
+			int cnt = 0;
+			char tmp;
+			while (true) {
+				if (kbhit()) {
+					++cnt;
+					tmp = _getch();
+				}
+				if (cnt >= 2) break;
+			}
+			system("cls");
+			break;
+		}
+		
+		// CLEAR----------------------------------
+		
+		gotoxy(47,0);
+		initBuffer();
+		
+		// SHOW-----------------------------------
+		
+		buffer[pacman.pos.x][pacman.pos.y] = pacman.shape;
+		
+		for (int i = 0; i < nGhost; ++i)
+			buffer[ghosts[i].pos.x][ghosts[i].pos.y] = ghosts[i].shape; 
+			
+		showBuffer();
+		
+		// CACULATE SCORE-------------------------
+		
+		if (score != preScore) {
+			changeColor(rand() % 16);
+			preScore = score;
+		}
+		printf("Score : %d", timeGame);
+		
+		
+		// CONTROL--------------------------------
+		
+		if (kbhit()) {
+				char key = _getch();
+				if (key == 32) {
+					while (true) {
+						if (kbhit()) {
+							key = _getch();
+							if (key == 32) break;
+						}
+					}
+				}
+					else 
+						if (key == 27) {
+							system("cls");
+							break;
+						}
+							else changeDirect(&ghosts[0], key);
+		}
+		if (timeGame % 10 == 0 || abs(ghosts[0].pos.x - x) == 0 || abs(ghosts[0].pos.y - y) == 0 || (pacman.pos.x == x && pacman.pos.y == y)) {
+			while (true) {
+				x = rand() % consoleHeight;
+				y = rand() % consoleWidth;
+				if (abs(ghosts[0].pos.x - x) + abs(ghosts[0].pos.y - y) >= 20) {
+					if (abs(ghosts[0].pos.x - x) != 0 && abs(ghosts[0].pos.y - y) != 0)
+						if (buffer[x][y] == '*') break;
+				}
+			}
+		}
+		struct character ghostFake;
+		ghostFake.pos.x = x;
+		ghostFake.pos.y = y;
+		ghostFake.shape = -101;
+		char tmp = buffer[x][y];
+		buffer[x][y] = ghostFake.shape;
+		findPacman(&pacman, &ghostFake);
+		buffer[x][y] = tmp;
+		
+		// SOLVE----------------------------------
+		
+		solvePacman(&pacman, &ghosts, &score);
+		for (int i = 0; i < nGhost; ++i)
+			solveGhost(&ghosts[i]);
+		
+		// MOVE-----------------------------------
+		
+		moveCharacter(&pacman);
+		for (int i = 0; i < nGhost; ++i)
+			moveCharacter(&ghosts[i]);
+		
+		// SYSTEM---------------------------------
+		++timeGame;
+		Sleep(speed);
+	}
+}
+
 int main() {
 	
-	// MENU
+	 //MENU
 	
 	printf("MENU :\n");
 	printf("1.EASY\n");
 	printf("2.HARD\n");
 	printf("3.FAKER\n");
 	printf("4.TWO PLAYERS\n");
+	printf("5.REVERSE\n");
 	
 	char choice = _getch();
 	
@@ -867,7 +1184,7 @@ int main() {
 		
 		system("cls");
 		// EASY MODE 
-		modeEasy();
+		modeEasy(0, 0, 0);
 
 	}
 	else
@@ -875,7 +1192,7 @@ int main() {
 			
 			system("cls");
 			// HARD MODE
-			modeHard();
+			modeHard(0, 0, 0);
 			
 		}
 			else 
@@ -883,15 +1200,19 @@ int main() {
 				
 				system("cls");
 				// FAKER MODE 
-				modeFaker();
+				modeFaker(0, 0, 0);
 				
 				}
-					else  {
-						system("cls");
-						//TWO PLAYERS MODE
-						modeTwoplayers();
-						
-					}
-	
+					else  
+						if (choice == '4') {
+							system("cls"); 
+							//TWO PLAYERS MODE
+							modeTwoplayers(0, 0, 0);
+						}
+							else {
+								system("cls");
+								// REVERSE MODE
+								modeReverse(0, 0, 0);
+							}
 	return 0;
 }
