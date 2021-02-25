@@ -238,9 +238,16 @@ void exitGame(int choiceMenu){
 }
 //setting
 void setting(int choiceMenu){
-	int enterMenu = 0, y = 18;
+	int enterMenu = 0, y = 18, x = 53;
 	frame();	
-
+	set_color("01;91");
+	gotoXY(x,y-7);    printf("  _________       __    __  .__               "); 
+	gotoXY(x,y-6);    printf(" /   _____/ _____/  |__/  |_|__| ____    ____  ");
+	gotoXY(x,y-5);    printf(" \\_____  \\_/ __ \\   __\\   __\\  |/    \\  / ___\\ ");
+	gotoXY(x,y-4);    printf(" /        \\  ___/|  |  |  | |  |   |  \\/ /_/  >");
+	gotoXY(x,y-3);    printf("/_______  /\\___  >__|  |__| |__|___|  /\\___  / ");
+	gotoXY(x,y-2);    printf("        \\/     \\/                   \\//_____/  ");
+	changeColor(15);
 	gotoXY(67, y);
 	printf("|     SPEED      |");	
 	if(choiceMenu == 1)
@@ -289,8 +296,15 @@ void setting(int choiceMenu){
 
 ///*MODE*///
 void mode(int choiceMenu){
-	int enterMenu = 0, y = 18;
+	int enterMenu = 0, y = 18,x=55;
 	frame();	
+	set_color("01;91");
+	gotoXY(x,y-7);    printf("  __    __     ______     _____     ______  ");  
+	gotoXY(x,y-6);    printf(" /\\ *-./  \\   /\\  __ \\   /\\  __-.  /\\  ___\\   ");
+	gotoXY(x,y-5);    printf(" \\ \\ \\-./\\ \\  \\ \\ \\/\\ \\  \\ \\ \\/\\ \\ \\ \\  __\\   ");
+ 	gotoXY(x,y-4);    printf("  \\ \\_\\ \\ \\_\\  \\ \\_____\\  \\ \\____-  \\ \\_____\\ ");
+  	gotoXY(x,y-3);    printf("   \\/_/  \\/_/   \\/_____/   \\/____/   \\/_____/ ");           
+	changeColor(15);                                 	
 	if(choiceMenu == 1)
 		changeColor(30);
 	gotoXY(67, y);
@@ -306,6 +320,16 @@ void mode(int choiceMenu){
 	gotoXY(67, y + 2);
 	printf("|    ***FAKER***    |");
 	changeColor(15);
+	if(choiceMenu == 4)
+		changeColor(95);	
+	gotoXY(67, y + 3);
+	printf("|  *PACMANandGHOST* |");
+	changeColor(15);
+	if(choiceMenu == 5)
+		changeColor(95);	
+	gotoXY(67, y + 4);
+	printf("|  ***playGHOST***  |");
+	changeColor(15);
 	do{
 		Nocursortype();
 		char c;
@@ -314,7 +338,7 @@ void mode(int choiceMenu){
 	        if(c == 72 && choiceMenu > 1){
 	            choiceMenu --;
 	        }
-	        if(c == 80 && choiceMenu < 3){
+	        if(c == 80 && choiceMenu < 5){
 	            choiceMenu ++;
 	        }
 	        if(c == 13){
@@ -331,8 +355,16 @@ void mode(int choiceMenu){
 }
 
 void play(int choiceMenu){
-	int enterMenu = 0, y = 18;
-	frame();
+	int enterMenu = 0, y = 18,x = 63;
+	frame();	
+	set_color("01;91");
+	gotoXY(x,y-7);    printf("__________.__                ");
+	gotoXY(x,y-6);    printf("\\______   \\  | _____  ___.__.");
+ 	gotoXY(x,y-5);    printf(" |     ___/  | \\__  \\<   |  |");
+ 	gotoXY(x,y-4);    printf(" |    |   |  |__/ __ \\\\___  |");
+ 	gotoXY(x,y-3);    printf(" |____|   |____(____  / ____|");
+	gotoXY(x,y-2);    printf("                    \\/\\/   ");
+	changeColor(15);;
 	if(choiceMenu == 1)
 		changeColor(30);
 	gotoXY(67, y);
@@ -390,8 +422,16 @@ void play(int choiceMenu){
 }
 
 void map(int choiceMenu){
-	int enterMenu = 0, y = 18;
+	int enterMenu = 0, y = 18,x = 63;
 	frame();	
+	set_color("01;91");
+	gotoXY(x,y-7);    printf("   _____      _____ __________ ");
+	gotoXY(x,y-6);    printf("  /     \\    /  _  \\\\______   \\");
+	gotoXY(x,y-5);    printf(" /  \\ /  \\  /  /_\\  \\|     ___/");
+	gotoXY(x,y-4);    printf("/    Y    \\/    |    \\    |    ");
+	gotoXY(x,y-3);    printf("\\____|__  /\\____|__  /____|    ");
+	gotoXY(x,y-2);    printf("        \\/         \\/         ");
+	changeColor(15);
 	gotoXY(70, y);
 	printf("|     MAP     |");	
 	if(choiceMenu == 1){
@@ -433,8 +473,17 @@ void map(int choiceMenu){
 
 
 void skin(int choiceMenu){
-	int enterMenu = 0, y = 18;
+	int enterMenu = 0, y = 18,x = 63;
 	frame();	
+	set_color("01;91");
+	gotoXY(x,y-7);    printf("  ___________   .__        ");
+	gotoXY(x,y-6);    printf(" /   _____/  | _|__| ____  ");
+	gotoXY(x,y-5);    printf(" \\_____  \\|  |/ /  |/    \\ ");
+	gotoXY(x,y-4);    printf(" /        \\    <|  |   |  \\");
+	gotoXY(x,y-3);    printf("/_______  /__|_ \\__|___|  /");
+	gotoXY(x,y-2);    printf("        \\/     \\/       \\/");
+	changeColor(15);
+	
 	gotoXY(70, y);
 	printf("|     SKIN     |");	
 	if(choiceMenu == 1){
@@ -592,6 +641,57 @@ void win(){
 	gotoXY(x,y + 7);printf("|      YYY     OOO   OOO   UUU  UUU         wwww  wwww       iii  NNN    NNNN  |");	delay(100);
 	gotoXY(x,y + 8);printf("|      YYY       OOOOO      UUUUUU           www  www       iiiii NNN     NNN  |");	delay(100);
 	gotoXY(x,y + 9);printf("|______________________________________________________________________________|");	delay(100);
+	gotoXY(x + 33,y + 13);printf("PLAY AGAIN!!");
+	changeColor(15);
+}
+
+void pacmanWin(){
+	clock_t timeS,timeE;//thoi gian xuat hien
+	timeS=clock();
+	do
+	{
+		timeE=clock();
+	}while(timeE-timeS <= 219);
+	set_color("01;36");
+	int x = 30, y = 10;
+	gotoXY(x,y);    printf("          )         )       ) " );      
+	gotoXY(x,y +1);    printf("    )   ( /(   (    (     ( /(   (  ");
+	gotoXY(x,y +2);    printf(" /(/(   )(_))  )\\   )\\  ' )(_))  )\\ ) "); 
+	gotoXY(x,y +3);    printf("((_)_\\ ((_)_  ((_)_((_)) ((_)_  _(_/(  ");
+	gotoXY(x,y +4);    printf("| '_ \\)/ _` |/ _|| '  \\()/ _` || ' \\)) ");
+	gotoXY(x,y +5);    printf("| .__/ \\__,_|\\__||_|_|_| \\__,_||_||_|  ");
+	gotoXY(x,y +6);    printf("|(| (   (                              ");
+	gotoXY(x,y +7);    printf("             )\))(  )\   (                         ");
+	gotoXY(x,y +8);    printf("            ((_)()\((_)  )\ )                      ");
+	gotoXY(x,y +9);    printf("          _(()(_)(_) _(_/(                      ");
+	gotoXY(x,y +10);    printf("         \\ \V  \V /| || ' \\))                     ");
+	gotoXY(x,y +11);    printf("          \\_/\\_/ |_||_||_| ");
+	gotoXY(x + 33,y + 13);printf("PLAY AGAIN!!");
+	changeColor(15);
+}
+
+void ghostWin(){
+	clock_t timeS,timeE;//thoi gian xuat hien
+	timeS=clock();
+	do
+	{
+		timeE=clock();
+	}while(timeE-timeS <= 219);
+	set_color("01;36");
+	int x = 30, y = 10;
+	gotoXY(x,y);    printf(" (          )              ) "); 
+	gotoXY(x,y +1);    printf(" )\\ )    ( /(           ( /(  ");
+	gotoXY(x,y +2);    printf("(()/(    )\\())  (   (   )\\()) ");
+	gotoXY(x,y +3);    printf(" /(_))_ ((_)\\   )\\  )\\ (_))/  ");
+	gotoXY(x,y +4);    printf("(_)) __|| |(_) ((_)((_)| |_   ");
+	gotoXY(x,y +5);    printf("  | (_ || ' \\ / _ \\(_-<|  _|  ");
+	gotoXY(x,y +6);    printf(" ( \\(__||_||_|\\___//__/ \\__|  ");
+	gotoXY(x,y +7);    printf("    )\\))(   ' (                  ");
+	gotoXY(x,y +8);    printf("   ((_)()\\ )  )\\   (             ");
+	gotoXY(x,y +9);    printf("   _(())\\_)()((_)  )\ )          ");
+	gotoXY(x,y +10);    printf("   \\ \\((_)/ / (_) _(_/(          ");
+	gotoXY(x,y +11);    printf("    \\ \\/\\/ /  | || ' \\))         ");
+	gotoXY(x,y +12);    printf("     \\_/\\_/   |_||_||_|   	");	
 	gotoXY(x + 33,y + 13);printf("PLAY AGAIN!!");
 	changeColor(15);
 }
