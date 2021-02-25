@@ -661,8 +661,8 @@ void pacmanWin(){
 	gotoXY(x,y +4);    printf("| '_ \\)/ _` |/ _|| '  \\()/ _` || ' \\)) ");
 	gotoXY(x,y +5);    printf("| .__/ \\__,_|\\__||_|_|_| \\__,_||_||_|  ");
 	gotoXY(x,y +6);    printf("|(| (   (                              ");
-	gotoXY(x,y +7);    printf("             )\))(  )\   (                         ");
-	gotoXY(x,y +8);    printf("            ((_)()\((_)  )\ )                      ");
+	gotoXY(x,y +7);    printf("             )\\))(  )\\   (                         ");
+	gotoXY(x,y +8);    printf("            ((_)()\\((_)  )\\ )                      ");
 	gotoXY(x,y +9);    printf("          _(()(_)(_) _(_/(                      ");
 	gotoXY(x,y +10);    printf("         \\ \V  \V /| || ' \\))                     ");
 	gotoXY(x,y +11);    printf("          \\_/\\_/ |_||_||_| ");
@@ -685,10 +685,10 @@ void ghostWin(){
 	gotoXY(x,y +3);    printf(" /(_))_ ((_)\\   )\\  )\\ (_))/  ");
 	gotoXY(x,y +4);    printf("(_)) __|| |(_) ((_)((_)| |_   ");
 	gotoXY(x,y +5);    printf("  | (_ || ' \\ / _ \\(_-<|  _|  ");
-	gotoXY(x,y +6);    printf(" ( \\(__||_||_|\\___//__/ \\__|  ");
+	gotoXY(x,y +6);    printf(" (\\ (__||_||_|\\___//__/ \\__|  ");
 	gotoXY(x,y +7);    printf("    )\\))(   ' (                  ");
 	gotoXY(x,y +8);    printf("   ((_)()\\ )  )\\   (             ");
-	gotoXY(x,y +9);    printf("   _(())\\_)()((_)  )\ )          ");
+	gotoXY(x,y +9);    printf("   _(())\\_)()((_)  )\\ )          ");
 	gotoXY(x,y +10);    printf("   \\ \\((_)/ / (_) _(_/(          ");
 	gotoXY(x,y +11);    printf("    \\ \\/\\/ /  | || ' \\))         ");
 	gotoXY(x,y +12);    printf("     \\_/\\_/   |_||_||_|   	");	
