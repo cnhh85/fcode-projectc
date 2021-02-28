@@ -76,14 +76,19 @@ char moveGhost[4] = {'a', 'w', 'd', 's'};
 
 int consoleWidth;
 int consoleHeight;
-int nFood = 300;
+int nFood = 300, nPlayereasy = 0, nPlayerhard = 0, nPlayerfaker = 0, nPlayerreverse = 0;
 int nGhost, choiceMode = 1;
-bool supperPacman = false;
-int speed, mapChoice = 0, modeGame = 1;
-
+bool supperPacman = false, cus = false;
+int speed, mapChoice = 0, modeGame = 1, pacmanSkin = 0;
+FILE *fEasy, *fHard, *fReverse, *fFaker;
 int score = 0, preScore = 0, timeGame = 0;
 bool loseGame = false, winGame = false, mark[105][105];
 char buffer[105][105];
+char **playersEasy = NULL, **playersHard = NULL, **playersFaker = NULL, **playersReverse = NULL;
+int scoresEasy[500], lenEasy[500];
+int scoresHard[500], lenHard[500];
+int scoresFaker[500], lenFaker[500];
+int scoresReverse[500], lenReverse[500];
 
 // MAP
 
@@ -143,6 +148,115 @@ maps[5][105][105] = {
 	},
 };
 
+void sortInc(int *score, char **players, int *len, int n) {
+	char tmp1[500];
+	for (int i = 0; i < n - 1; ++i)
+		for (int j = i + 1; j < n; ++j)
+			if (score[i] > score[j]) {
+				int tmp = score[i];
+				score[i] = score[j];
+				score[j] = tmp;
+				tmp = len[i];
+				len[i] = len[j];
+				len[j] = tmp;
+				for (int k = 0; k < max(len[i],len[j]); ++k) tmp1[k] = players[i][k];
+				for (int k = 0; k < max(len[i],len[j]); ++k) players[i][k] = players[j][k];
+				for (int k = 0; k < max(len[i],len[j]); ++k) players[j][k] = tmp1[k]; 
+			}
+}
+
+void sortDec(int *score, char **players, int *len, int n) {
+	char tmp1[500];
+	for (int i = 0; i < n - 1; ++i)
+		for (int j = i + 1; j < n; ++j)
+			if (score[i] < score[j]) {
+				int tmp = score[i];
+				score[i] = score[j];
+				score[j] = tmp;
+				tmp = len[i];
+				len[i] = len[j];
+				len[j] = tmp;
+				for (int k = 0; k < max(len[i],len[j]); ++k) tmp1[k] = players[i][k];
+				for (int k = 0; k < max(len[i],len[j]); ++k) players[i][k] = players[j][k];
+				for (int k = 0; k < max(len[i],len[j]); ++k) players[j][k] = tmp1[k]; 
+			}
+}
+
+void copyData() {
+	fEasy = fopen("rankingEasy.txt","r");
+	char c;
+	nPlayereasy = 0;
+	scoresEasy[0] = 0;
+	lenEasy[0] = 0;
+	bool ok = false;
+	while(!feof(fEasy) ) {
+		c = fgetc(fEasy);
+		if (ok && c != '\n') scoresEasy[nPlayereasy] = scoresEasy[nPlayereasy] * 10 + c - 48;
+		if (c == ' ') ok = true;
+		if (ok == false && c != '\n') playersEasy[nPlayereasy][lenEasy[nPlayereasy]++] = c; 
+		if (c == '\n') {
+			++ nPlayereasy;
+			ok = false;
+		}
+	}	
+	sortInc(&scoresEasy, playersEasy, &lenEasy, nPlayereasy);
+	fclose(fEasy);
+	
+	fHard = fopen("rankingHard.txt","r");
+	nPlayerhard = 0;
+	scoresHard[0] = 0;
+	lenHard[0] = 0;
+	ok = false;
+	while(!feof(fHard) ) {
+		c = fgetc(fHard);
+		if (ok && c != '\n') scoresHard[nPlayerhard] = scoresHard[nPlayerhard] * 10 + c - 48;
+		if (c == ' ') ok = true;
+		if (ok == false && c != '\n') playersHard[nPlayerhard][lenHard[nPlayerhard]++] = c; 
+		if (c == '\n') {
+			++ nPlayerhard;
+			ok = false;
+		}
+	}	
+	sortInc(&scoresHard, playersHard, &lenHard, nPlayerhard);
+	fclose(fHard);
+	
+	fFaker = fopen("rankingFaker.txt","r");
+	nPlayerfaker = 0;
+	scoresFaker[0] = 0;
+	lenFaker[0] = 0;
+	ok = false;
+	while(!feof(fFaker) ) {
+		c = fgetc(fFaker);
+		if (ok && c != '\n') scoresFaker[nPlayerfaker] = scoresFaker[nPlayerfaker] * 10 + c - 48;
+		if (c == ' ') ok = true;
+		if (ok == false && c != '\n') playersFaker[nPlayerfaker][lenFaker[nPlayerfaker]++] = c; 
+		if (c == '\n') {
+			++ nPlayerfaker;
+			ok = false;
+		}
+	}	
+	sortInc(&scoresFaker, playersFaker, &lenFaker, nPlayerfaker);
+	fclose(fFaker);
+	
+	fReverse = fopen("rankingReverse.txt","r");
+	nPlayerreverse = 0;
+	scoresReverse[0] = 0;
+	lenReverse[0] = 0;
+	ok = false;
+	while(!feof(fReverse) ) {
+		c = fgetc(fReverse);
+		if (ok && c != '\n') scoresReverse[nPlayerreverse] = scoresReverse[nPlayerreverse] * 10 + c - 48;
+		if (c == ' ') ok = true;
+		if (ok == false && c != '\n') playersReverse[nPlayerreverse][lenReverse[nPlayerreverse]++] = c; 
+		if (c == '\n') {
+			++ nPlayerreverse;
+			ok = false;
+		}
+	}	
+	sortDec(&scoresReverse, playersReverse, &lenReverse, nPlayerreverse);
+	fclose(fReverse);
+}
+
 void setting(int speedTmp) {
 	speed = speedTmp;
 }
@@ -150,9 +264,15 @@ void setting(int speedTmp) {
 void initMap(int mapIndex) {
 	consoleHeight = mapLen[mapIndex].y;
 	consoleWidth = mapLen[mapIndex].x;
-	for (int i = 0; i < consoleHeight; ++i)
-		for (int j = 0; j < consoleWidth; ++j)
+	for (int i = 0; i <= consoleHeight; ++i)
+		for (int j = 0; j <= consoleWidth; ++j)
 			mapCurrent[i][j] = maps[mapIndex][i][j];
+}
+
+void removeMap() {
+	for (int i = 0; i < 60; ++i)
+		for (int j = 0; j < 40; ++j)
+			buffer[i][j] = ' ';
 }
 
 void initBuffer() {
@@ -484,9 +604,13 @@ void modeEasy(int speedCus,bool custom) {
 	srand(time(NULL));
 	setting(50);
 	if (custom) setting(speedCus);
+	removeMap();
 	nGhost = 3;
 	score = 0;
 	preScore = 0;
+	timeGame = 0;
+	if (mapChoice == 0) nFood = 300;
+	if (mapChoice == 1) nFood = 500;
 	loseGame = winGame = false;
 	struct character pacman;
 	struct character ghosts[nGhost];
@@ -501,35 +625,20 @@ void modeEasy(int speedCus,bool custom) {
 	while (true) {
 		
 		// CHECK ENDGAME-------------------------
-	
 		if (loseGame == true) {	
-			system("cls");
-			lose();
-			int cnt = 0;
-			char tmp;
-			while (true) {
-				if (kbhit()) {
-					++cnt;
-					tmp = _getch();
-				}
-				if (cnt >= 2) break;
-			}
+			//system("cls");
+			removeMap();
+			showBuffer();
+			lose(score, 1);
 			system("cls");
 			break;	
 		}
 		
 		if (winGame == true) {
-			system("cls");
-			win();
-			int cnt = 0;
-			char tmp;
-			while (true) {
-				if (kbhit()) {
-					++cnt;
-					tmp = _getch();
-				}
-				if (cnt >= 2) break;
-			}
+			//system("cls");
+			removeMap();
+			showBuffer();
+			win(score, 1);
 			system("cls");
 			break;
 		}
@@ -547,6 +656,19 @@ void modeEasy(int speedCus,bool custom) {
 			buffer[ghosts[i].pos.x][ghosts[i].pos.y] = ghosts[i].shape; 
 			
 		showBuffer();
+		if (supperPacman == true) {
+			if (timeSupperpacman % 10 == 0) {
+				gotoXY( 115, 9);
+				changeColorr(12);
+				printf("TIME SUPPER FOOD : ");
+				changeColorr(7);
+				printf("%d", 8 - timeSupperpacman / 10);
+			}
+		}
+		else {
+				gotoXY( 115, 9);
+				printf("                     ");
+		}
 		
 		// CACULATE SCORE-------------------------
 		gotoXY( 115, 1);
@@ -594,11 +716,13 @@ void modeEasy(int speedCus,bool custom) {
 			moveCharacter(&ghosts[i]);
 		
 		// SYSTEM---------------------------------
-		
+	
 		
 		if (timeGame >= 20) {
-			if (supperPacman == true) ++timeSupperpacman;
-			if (timeSupperpacman == 70) {
+			if (supperPacman == true) {
+				++timeSupperpacman;
+			}
+			if (timeSupperpacman == 90) {
 				supperPacman = false; 
 				timeSupperpacman = 0;
 			}
@@ -625,9 +749,13 @@ void modeHard(int speedCus,bool custom) {
 	srand(time(NULL));
 	setting(50);
 	if (custom) setting(speedCus);
+	removeMap();
 	nGhost = 1;
 	score = 0;
 	preScore = 0;
+	timeGame = 0;
+	if (mapChoice == 0) nFood = 300;
+	if (mapChoice == 1) nFood = 500;
 	loseGame = winGame = false;
 	struct character pacman;
 	struct character ghosts[nGhost];
@@ -644,34 +772,19 @@ void modeHard(int speedCus,bool custom) {
 		// CHECK ENDGAME-------------------------
 		
 		if (loseGame == true) {	
-			system("cls");
-			lose();
-			int cnt = 0;
-			char tmp;
-			while (true) {
-				if (kbhit()) {
-					++cnt;
-					tmp = _getch();
-				}
-				if (cnt >= 2) break;
-			}
+			//system("cls");
+			removeMap();
+			showBuffer();
+			lose(score, 2);
 			system("cls");
 			break;	
 		}
 		
 		if (winGame == true) {
-			system("cls");
-			win();
-			printf("YOU WIN !!!!\n");
-			int cnt = 0;
-			char tmp;
-			while (true) {
-				if (kbhit()) {
-					++cnt;
-					tmp = _getch();
-				}
-				if (cnt >= 2) break;
-			}
+			//system("cls");
+			removeMap();
+			showBuffer();
+			win(score, 2);
 			system("cls");
 			break;
 		}
@@ -689,6 +802,19 @@ void modeHard(int speedCus,bool custom) {
 			buffer[ghosts[i].pos.x][ghosts[i].pos.y] = ghosts[i].shape; 
 			
 		showBuffer();
+		if (supperPacman == true) {
+			if (timeSupperpacman % 10 == 0) {
+				gotoXY( 115, 9);
+				changeColorr(12);
+				printf("TIME SUPPER FOOD : ");
+				changeColorr(7);
+				printf("%d", 8 - timeSupperpacman / 10);
+			}
+		}
+		else {
+				gotoXY( 115, 9);
+				printf("                     ");
+		}
 		
 		// CACULATE SCORE-------------------------
 		gotoXY( 115, 1);
@@ -764,9 +890,13 @@ void modeFaker(int speedCus,bool custom) {
 	srand(time(NULL));
 	setting(0);
 	if (custom) setting(speedCus);
+	removeMap();
 	nGhost = 2;
 	score = 0;
+	timeGame = 0;
 	preScore = 0;
+	if (mapChoice == 0) nFood = 300;
+	if (mapChoice == 1) nFood = 500;
 	loseGame = winGame = false;
 	struct character pacman;
 	struct character ghosts[nGhost];
@@ -783,33 +913,19 @@ void modeFaker(int speedCus,bool custom) {
 		// CHECK ENDGAME-------------------------
 	
 		if (loseGame == true) {	
-			system("cls");
-			lose();
-			int cnt = 0;
-			char tmp;
-			while (true) {
-				if (kbhit()) {
-					++cnt;
-					tmp = _getch();
-				}
-				if (cnt >= 2) break;
-			}
+			//system("cls");
+			removeMap();
+			showBuffer();
+			lose(score, 3);
 			system("cls");
 			break;	
 		}
 		
 		if (winGame == true) {
-			system("cls");
-			win();
-			int cnt = 0;
-			char tmp;
-			while (true) {
-				if (kbhit()) {
-					++cnt;
-					tmp = _getch();
-				}
-				if (cnt >= 2) break;
-			}
+			//system("cls");
+			removeMap();
+			showBuffer();
+			win(score, 3);
 			system("cls");
 			break;
 		}
@@ -827,6 +943,21 @@ void modeFaker(int speedCus,bool custom) {
 			buffer[ghosts[i].pos.x][ghosts[i].pos.y] = ghosts[i].shape; 
 			
 		showBuffer();
+		
+		if (supperPacman == true) {
+			if (timeSupperpacman % 10 == 0) {
+				gotoXY( 115, 9);
+				changeColorr(12);
+				printf("TIME SUPPER FOOD : ");
+				changeColorr(7);
+				printf("%d", 8 - timeSupperpacman / 10);
+			}
+		}
+		else {
+				gotoXY( 115, 9);
+				printf("                     ");
+		}
+		
 		gotoXY( 115, 1);
 		if (score != preScore) {
 			changeColorr(rand() % 16);
@@ -907,8 +1038,11 @@ void modeTwoplayers(int speedCus,bool custom) {
 	srand(time(NULL));
 	setting(0);
 	if (custom) setting(speedCus);
+	removeMap();
 	nGhost = 1;
-	nFood = 300;
+	if (mapChoice == 0) nFood = 300;
+	if (mapChoice == 1) nFood = 500;
+	timeGame = 0;
 	int scorePacman = 0 , prescorePacman = 0;
 	int scoreGhost = 0 , prescoreGhost = 0;
 	loseGame = winGame = false;
@@ -926,13 +1060,19 @@ void modeTwoplayers(int speedCus,bool custom) {
 		// CHECK ENDGAME-------------------------
 	
 		if (winGame == true) {
-			system("cls");
+			//system("cls");
 			gotoxy(55,8);
 			changeColorr(4);
-			if (scorePacman > scoreGhost)
-				printf("PACMAN WIN !!!!\n");
-			else
-				printf("GHOST WIN !!!!\n");
+			if (scorePacman > scoreGhost) {
+				removeMap();
+				showBuffer();
+				pacmanWin();
+			}
+			else {
+				removeMap();
+				showBuffer();
+				ghostWin();
+			}
 			int cnt = 0;
 			char tmp;
 			while (true) {
@@ -1015,6 +1155,7 @@ void modeTwoplayers(int speedCus,bool custom) {
 		
 		// SYSTEM---------------------------------
 		++timeGame;
+		timeGame %= 100;
 		Sleep(speed);
 	}
 }
@@ -1024,10 +1165,14 @@ void modeReverse(int speedCus,bool custom) {
 	srand(time(NULL));
 	setting(0);
 	if (custom) setting(speedCus);
+	removeMap();
 	nGhost = 1;
 	score = 0;
 	preScore = 0;
+	timeGame = 0;
 	loseGame = winGame = false;
+	if (mapChoice == 0) nFood = 300;
+	if (mapChoice == 1) nFood = 500;
 	struct character pacman;
 	struct character ghosts[nGhost];
 	initMap(mapChoice);
@@ -1043,33 +1188,19 @@ void modeReverse(int speedCus,bool custom) {
 		// CHECK ENDGAME-------------------------
 		
 		if (winGame == true) {	
-			system("cls");
-			lose();
-			int cnt = 0;
-			char tmp;
-			while (true) {
-				if (kbhit()) {
-					++cnt;
-					tmp = _getch();
-				}
-				if (cnt >= 2) break;
-			}
+			//system("cls");
+			removeMap();
+			showBuffer();
+			lose(score, 4);
 			system("cls");
 			break;	
 		}
 		
 		if (loseGame == true) {
-			system("cls");
-			win();
-			int cnt = 0;
-			char tmp;
-			while (true) {
-				if (kbhit()) {
-					++cnt;
-					tmp = _getch();
-				}
-				if (cnt >= 2) break;
-			}
+			//system("cls");
+			removeMap();
+			showBuffer();
+			win(score, 4);
 			system("cls");
 			break;
 		}
@@ -1094,7 +1225,7 @@ void modeReverse(int speedCus,bool custom) {
 			changeColorr(rand() % 16);
 			preScore = score;
 		}
-		printf("Score : %d", timeGame);
+		printf("Score : %d", score * 10);
 		
 		
 		// CONTROL--------------------------------
@@ -1122,7 +1253,9 @@ void modeReverse(int speedCus,bool custom) {
 				y = rand() % consoleWidth;
 				if (abs(ghosts[0].pos.x - x) + abs(ghosts[0].pos.y - y) >= 20) {
 					if (abs(ghosts[0].pos.x - x) != 0 && abs(ghosts[0].pos.y - y) != 0)
-						if (buffer[x][y] == '*') break;
+						if (score <= 290)  
+							if (buffer[x][y] == '*') break;
+						if (buffer[x][y] == ' ') break;
 				}
 			}
 		}
@@ -1149,6 +1282,7 @@ void modeReverse(int speedCus,bool custom) {
 		
 		// SYSTEM---------------------------------
 		++timeGame;
+		timeGame %= 100;
 		Sleep(speed);
 	}
 }
@@ -1265,35 +1399,37 @@ void framePlay(){
 	printf("Help: Use WASD to MOVE");
 	gotoXY( 115, 7);
 	printf("EAT * to win");
+
+	
 	
 	if (modeGame == 1) {
 		
 		// EASY MODE 
-		modeEasy(0, 0);
+		modeEasy(speed, cus);
 
 	}
 	else
 		if (modeGame == 2) {
 			
 			// HARD MODE
-			modeHard(0, 0);
+			modeHard(speed, cus);
 			
 		}
 			else 
 				if (modeGame == 3) {
 				
 				// FAKER MODE 
-				modeFaker(0, 0);
+				modeFaker(speed, cus);
 				
 				}
 					else  
 						if (modeGame == 4) {
 							//TWO PLAYERS MODE
-							modeTwoplayers(0, 0);
+							modeTwoplayers(speed, cus);
 						}
 							else {
 								// REVERSE MODE
-								modeReverse(0, 0);
+								modeReverse(speed, cus);
 							}
 }
 
@@ -1353,11 +1489,18 @@ void exitGame(int choiceMenu){
 	}
 	while (enterMenu != 13);
 }
-//setting
-void settingUI(int choiceMenu){
-	int enterMenu = 0, y = 18;
-	frame();	
 
+void settingUI(int choiceMenu){
+	int enterMenu = 0, y = 18, x = 53;
+	frame();	
+	set_color("01;91");
+	gotoXY(x,y-7);    printf("  _________       __    __  .__               "); 
+	gotoXY(x,y-6);    printf(" /   _____/ _____/  |__/  |_|__| ____    ____  ");
+	gotoXY(x,y-5);    printf(" \\_____  \\_/ __ \\   __\\   __\\  |/    \\  / ___\\ ");
+	gotoXY(x,y-4);    printf(" /        \\  ___/|  |  |  | |  |   |  \\/ /_/  >");
+	gotoXY(x,y-3);    printf("/_______  /\\___  >__|  |__| |__|___|  /\\___  / ");
+	gotoXY(x,y-2);    printf("        \\/     \\/                   \\//_____/  ");
+	changeColor(15);
 	gotoXY(67, y);
 	printf("|     SPEED      |");	
 	if(choiceMenu == 1)
@@ -1391,7 +1534,11 @@ void settingUI(int choiceMenu){
 	        if(c == 77 && choiceMenu < 3){
 	            choiceMenu ++;
 	        }
-	        if(c == 13){
+	        if(c == 13 || c == 27){
+	        	if (c == 13) {
+	        		speed = (3 - choiceMenu) * 100;
+	        		cus = true;
+	        	}
 	        	system("cls");
 	        	frame();
 	        	printMenuBanner();
@@ -1406,8 +1553,15 @@ void settingUI(int choiceMenu){
 
 ///*MODE*///
 void mode(int choiceMenu){
-	int enterMenu = 0, y = 18;
+	int enterMenu = 0, y = 18,x=55;
 	frame();	
+	set_color("01;91");
+	gotoXY(x,y-7);    printf("  __    __     ______     _____     ______  ");  
+	gotoXY(x,y-6);    printf(" /\\ *-./  \\   /\\  __ \\   /\\  __-.  /\\  ___\\   ");
+	gotoXY(x,y-5);    printf(" \\ \\ \\-./\\ \\  \\ \\ \\/\\ \\  \\ \\ \\/\\ \\ \\ \\  __\\   ");
+ 	gotoXY(x,y-4);    printf("  \\ \\_\\ \\ \\_\\  \\ \\_____\\  \\ \\____-  \\ \\_____\\ ");
+  	gotoXY(x,y-3);    printf("   \\/_/  \\/_/   \\/_____/   \\/____/   \\/_____/ ");           
+	changeColor(15);                                 	
 	if(choiceMenu == 1)
 		changeColor(30);
 	gotoXY(67, y);
@@ -1423,6 +1577,16 @@ void mode(int choiceMenu){
 	gotoXY(67, y + 2);
 	printf("|    ***FAKER***    |");
 	changeColor(15);
+	if(choiceMenu == 4)
+		changeColor(95);	
+	gotoXY(67, y + 3);
+	printf("|  *PACMANandGHOST* |");
+	changeColor(15);
+	if(choiceMenu == 5)
+		changeColor(95);	
+	gotoXY(67, y + 4);
+	printf("|  ***playGHOST***  |");
+	changeColor(15);
 	do{
 		Nocursortype();
 		char c;
@@ -1431,11 +1595,11 @@ void mode(int choiceMenu){
 	        if(c == 72 && choiceMenu > 1){
 	            choiceMenu --;
 	        }
-	        if(c == 80 && choiceMenu < 3){
+	        if(c == 80 && choiceMenu < 5){
 	            choiceMenu ++;
 	        }
-	        if(c == 13){
-	        	modeGame = choiceMenu;
+	        if(c == 13 || c == 27){
+	        	if (c == 13) modeGame = choiceMenu;
 	        	system("cls");
 	        	frame();
 	        	printMenuBanner();
@@ -1449,8 +1613,16 @@ void mode(int choiceMenu){
 }
 
 void play(int choiceMenu){
-	int enterMenu = 0, y = 18;
-	frame();
+	int enterMenu = 0, y = 18,x = 63;
+	frame();	
+	set_color("01;91");
+	gotoXY(x,y-7);    printf("__________.__                ");
+	gotoXY(x,y-6);    printf("\\______   \\  | _____  ___.__.");
+ 	gotoXY(x,y-5);    printf(" |     ___/  | \\__  \\<   |  |");
+ 	gotoXY(x,y-4);    printf(" |    |   |  |__/ __ \\\\___  |");
+ 	gotoXY(x,y-3);    printf(" |____|   |____(____  / ____|");
+	gotoXY(x,y-2);    printf("                    \\/\\/   ");
+	changeColor(15);
 	if(choiceMenu == 1)
 		changeColor(30);
 	gotoXY(67, y);
@@ -1494,7 +1666,7 @@ void play(int choiceMenu){
 					skin(num);
 				}
 			}
-			if(c == 27){
+			if(c == 27) {
 				system("cls");
 				frame();
 	        	printMenuBanner();
@@ -1508,8 +1680,16 @@ void play(int choiceMenu){
 }
 
 void map(int choiceMenu){
-	int enterMenu = 0, y = 18;
+	int enterMenu = 0, y = 18,x = 63;
 	frame();	
+	set_color("01;91");
+	gotoXY(x,y-7);    printf("   _____      _____ __________ ");
+	gotoXY(x,y-6);    printf("  /     \\    /  _  \\\\______   \\");
+	gotoXY(x,y-5);    printf(" /  \\ /  \\  /  /_\\  \\|     ___/");
+	gotoXY(x,y-4);    printf("/    Y    \\/    |    \\    |    ");
+	gotoXY(x,y-3);    printf("\\____|__  /\\____|__  /____|    ");
+	gotoXY(x,y-2);    printf("        \\/         \\/         ");
+	changeColor(15);
 	gotoXY(70, y);
 	printf("|     MAP     |");	
 	if(choiceMenu == 1){
@@ -1552,8 +1732,17 @@ void map(int choiceMenu){
 
 
 void skin(int choiceMenu){
-	int enterMenu = 0, y = 18;
+	int enterMenu = 0, y = 18,x = 63;
 	frame();	
+	set_color("01;91");
+	gotoXY(x,y-7);    printf("  ___________   .__        ");
+	gotoXY(x,y-6);    printf(" /   _____/  | _|__| ____  ");
+	gotoXY(x,y-5);    printf(" \\_____  \\|  |/ /  |/    \\ ");
+	gotoXY(x,y-4);    printf(" /        \\    <|  |   |  \\");
+	gotoXY(x,y-3);    printf("/_______  /__|_ \\__|___|  /");
+	gotoXY(x,y-2);    printf("        \\/     \\/       \\/");
+	changeColor(15);
+	
 	gotoXY(70, y);
 	printf("|     SKIN     |");	
 	if(choiceMenu == 1){
@@ -1583,6 +1772,7 @@ void skin(int choiceMenu){
 	        }
 	        if(c == 13){
 	        	system("cls");
+	        	pacmanSkin = choiceMenu;
 	        	frame();
 	        	play(1);
 	        	enterMenu = 13;
@@ -1653,7 +1843,7 @@ int printMenu(int choiceMenu){
 				if(choiceMenu == 4){
 					system("cls");
 					int num = 0;
-//					setting(num);
+					ranking(num);
 				}
 			}
 			if(c == 27){
@@ -1668,8 +1858,158 @@ int printMenu(int choiceMenu){
 	return 0;
 }
 
+void ranking(int choiceMenu) {
+	int y= 18,x = 50, enterMenu = 0;
+	frame();	
+	set_color("01;91");
+	gotoXY(x,y-7);    printf("    //   ) )                                                  ");
+	gotoXY(x,y-6);    printf("   //___/ /   _       _     / __     ( )   _      __    ");
+	gotoXY(x,y-5);    printf("  / _ (   //   ) ) //   ) ) //\\ \\     / / //   ) ) //   ) ) ");
+	gotoXY(x,y-4);    printf(" //   | |  //   / / //   / / //  \\ \\   / / //   / / ((___/ /  ");
+	gotoXY(x,y-3);    printf("//    | | ((__( ( //   / / //    \\ \\ / / //   / /   //_    ");
+	changeColor(15);
+	if(choiceMenu == 1)
+		changeColor(30);
+	gotoXY(67, y);
+	printf("|     NORMAL      |");
+	changeColor(15);
+	if(choiceMenu == 2)
+		changeColor(71);
+	gotoXY(67, y + 1);
+	printf("|     *HARD*      |");
+	changeColor(15);
+	if(choiceMenu == 3)
+		changeColor(95);	
+	gotoXY(67, y + 2);
+	printf("|    **FAKER**    |");
+	changeColor(15);
+	if(choiceMenu == 4)
+		changeColor(95);	
+	gotoXY(67, y + 3);
+	printf("|  **playGHOST**  |");
+	changeColor(15);
+	do{
+		Nocursortype();
+		char c;
+		if(kbhit()){
+	        c = getch();
+	        if(c == 72 && choiceMenu > 1){
+	            choiceMenu --;
+	        }
+	        if(c == 80 && choiceMenu < 4){
+	            choiceMenu ++;
+	        }
+	        if(c == 13 ){
+	        	if (choiceMenu == 0) continue;
+        		system("cls");
+        		showRanking(choiceMenu);
+			}
+			if (c == 27) {
+				system("cls");
+				frame();
+				printMenuBanner();
+				printMenu(4);
+				return;
+			}
+			ranking(choiceMenu);
+		}
+	}
+	while (enterMenu != 13);
+}
 
-void lose(){
+void showRanking(int choice) {
+	int y= 18,x = 50, enterMenu = 0;
+	frame();	
+	set_color("01;91");
+	gotoXY(x,y-7);    printf("    //   ) )                                                  ");
+	gotoXY(x,y-6);    printf("   //___/ /   _       _     / __     ( )   _      __    ");
+	gotoXY(x,y-5);    printf("  / _ (   //   ) ) //   ) ) //\\ \\     / / //   ) ) //   ) ) ");
+	gotoXY(x,y-4);    printf(" //   | |  //   / / //   / / //  \\ \\   / / //   / / ((___/ /  ");
+	gotoXY(x,y-3);    printf("//    | | ((__( ( //   / / //    \\ \\ / / //   / /   //_    ");
+	changeColor(15);
+	y = 18, x = 70;
+	gotoXY(x, y);
+	printf("Users          Scores");
+	y += 3;
+	if (choice == 1) {
+		for (int i = 0; i < min(5, nPlayereasy); ++i) {
+			gotoXY(x, y);
+			for (int j = 0; j < lenEasy[i]; ++j) printf("%c", playersEasy[i][j]);
+			for (int j = 0; j < 16 - lenEasy[i]; ++j) printf(" ");
+			printf(" %d", scoresEasy[i]);
+			++y;
+		}
+		while (true) {
+			if (kbhit()) {
+				char c = getch();
+				if (c == 27) {
+					system("cls");
+					ranking(choice);
+		        	return;
+				}
+			}
+		}
+	}
+	if (choice == 2) {
+		for (int i = 0; i < min(5, nPlayerhard); ++i) {
+			gotoXY(x, y);
+			for (int j = 0; j < lenHard[i]; ++j) printf("%c", playersHard[i][j]);
+			for (int j = 0; j < 16 - lenHard[i]; ++j) printf(" ");
+			printf(" %d", scoresHard[i]);
+			++y;
+		}
+		while (true) {
+			if (kbhit()) {
+				char c = getch();
+				if (c == 27) {
+					system("cls");
+					ranking(choice);
+		        	return;
+				}
+			}
+		}
+	}
+	if (choice == 3) {
+		for (int i = 0; i < min(5, nPlayerfaker); ++i) {
+			gotoXY(x, y);
+			for (int j = 0; j < lenFaker[i]; ++j) printf("%c", playersFaker[i][j]);
+			for (int j = 0; j < 16 - lenFaker[i]; ++j) printf(" ");
+			printf(" %d", scoresFaker[i]);
+			++y;
+		}
+		while (true) {
+			if (kbhit()) {
+				char c = getch();
+				if (c == 27) {
+					system("cls");
+					ranking(choice);
+		        	return;
+				}
+			}
+		}
+	}
+	if (choice == 4) {
+		for (int i = 0; i < min(5, nPlayerreverse); ++i) {
+			gotoXY(x, y);
+			for (int j = 0; j < lenReverse[i]; ++j) printf("%c", playersReverse[i][j]);
+			for (int j = 0; j < 16 - lenReverse[i]; ++j) printf(" ");
+			printf(" %d", scoresReverse[i]);
+			++y;
+		}
+		while (true) {
+			if (kbhit()) {
+				char c = getch();
+				if (c == 27) {
+					system("cls");
+					ranking(choice);
+		        	return;
+				}
+			}
+		}
+	}
+}
+
+void lose(int score, int mode){
 	clock_t timeS,timeE;//thoi gian xuat hien
 	timeS=clock();
 	do
@@ -1677,7 +2017,8 @@ void lose(){
 		timeE=clock();
 	}while(timeE-timeS <= 219);
 	set_color("01;91");
-	int x = 30, y = 10;
+	removeMap();
+	int x = 25, y = 10;
 	gotoXY(x,y);    printf(" ______________________________________________________________________________");      delay(500);
 	gotoXY(x,y + 1);printf("|                                                                              |");     delay(100);
 	gotoXY(x,y + 2);printf("| YYY      YYY   OOOOO    UUU    UUU     LLL       OOOOO      SSSSS   EEEEEEEE | ");    delay(100);
@@ -1688,19 +2029,160 @@ void lose(){
 	gotoXY(x,y + 7);printf("|      YYY     OOO   OOO   UUU  UUU      LLL     OOO   OOO   SSS  SSS EEE      | ");	delay(100);
 	gotoXY(x,y + 8);printf("|      YYY       OOOOO      UUUUUU       LLLLLLLL  OOOOO       SSSS   EEEEEEEE | ");	delay(100);
 	gotoXY(x,y + 9);printf("|______________________________________________________________________________| ");	delay(100);
-	gotoXY(x + 33,y + 13);printf("PLAY AGAIN!!");
+	gotoXY(x + 33,y + 13);
+	printf("ENTER YOUR NAME : ");
+	
+	char c, player[100];
+	int cnt = 0;
+	if (mode == 1) {
+		while (true) {
+			c = getchar();
+			if (c == ' ') continue;
+			if (c == '\n') break;
+			player[cnt++] = c;
+		}
+		for (int i = 0; i < nPlayereasy; ++i) {
+			bool flag = false;
+			for (int j = 0; j < lenEasy[i]; ++j)
+				if (player[j] != playersEasy[i][j]) {
+					flag = true;
+					break;
+				}
+			if (flag == false) {
+				scoresEasy[i] = max(score, scoresEasy[i]);
+				return;
+			}
+		}
+		lenEasy[nPlayereasy] = cnt;
+		scoresEasy[nPlayereasy] = score * 100;
+		for (int i = 0; i < cnt; ++i) {
+			playersEasy[nPlayereasy][i] = player[i];
+		}
+		fEasy = fopen("rankingEasy.txt","w");
+		++nPlayereasy;
+		for (int i = 0; i < nPlayereasy; ++i) {
+			for (int j = 0; j < lenEasy[i]; ++j) {
+				fprintf(fEasy, "%c", playersEasy[i][j]);
+			}
+			fprintf(fEasy, " %d\n", scoresEasy[i]);
+		}
+		fclose(fEasy);
+	}
+	if (mode == 2) {
+		while (true) {
+			c = getchar();
+			if (c == ' ') continue;
+			if (c == '\n') break;
+			player[cnt++] = c;
+		}
+		for (int i = 0; i < nPlayerhard; ++i) {
+			bool flag = false;
+			for (int j = 0; j < lenHard[i]; ++j)
+				if (player[j] != playersHard[i][j]) {
+					flag = true;
+					break;
+				}
+			if (flag == false) {
+				scoresHard[i] = max(score, scoresHard[i]);
+				return;
+			}
+		}
+		lenHard[nPlayerhard] = cnt;
+		scoresHard[nPlayerhard] = score * 100;
+		for (int i = 0; i < cnt; ++i) {
+			playersHard[nPlayerhard][i] = player[i];
+		}
+		fHard = fopen("rankingHard.txt","w");
+		++nPlayerhard;
+		for (int i = 0; i < nPlayerhard; ++i) {
+			for (int j = 0; j < lenHard[i]; ++j) {
+				fprintf(fHard, "%c", playersHard[i][j]);
+			}
+			fprintf(fHard, " %d\n", scoresHard[i]);
+		}
+		fclose(fHard);
+	}
+	if (mode == 3) {
+		while (true) {
+			c = getchar();
+			if (c == ' ') continue;
+			if (c == '\n') break;
+			player[cnt++] = c;
+		}
+		for (int i = 0; i < nPlayerfaker; ++i) {
+			bool flag = false;
+			for (int j = 0; j < lenFaker[i]; ++j)
+				if (player[j] != playersFaker[i][j]) {
+					flag = true;
+					break;
+				}
+			if (flag == false) {
+				scoresFaker[i] = max(score, scoresFaker[i]);
+				return;
+			}
+		}
+		lenFaker[nPlayerfaker] = cnt;
+		scoresFaker[nPlayerfaker] = score * 100;
+		for (int i = 0; i < cnt; ++i) {
+			playersFaker[nPlayerfaker][i] = player[i];
+		}
+		fFaker = fopen("rankingFaker.txt","w");
+		++nPlayerfaker;
+		for (int i = 0; i < nPlayerfaker; ++i) {
+			for (int j = 0; j < lenFaker[i]; ++j) {
+				fprintf(fFaker, "%c", playersFaker[i][j]);
+			}
+			fprintf(fFaker, " %d\n", scoresFaker[i]);
+		}
+		fclose(fFaker);
+	}
+	if (mode == 4) {
+		while (true) {
+			c = getchar();
+			if (c == ' ') continue;
+			if (c == '\n') break;
+			player[cnt++] = c;
+		}
+		for (int i = 0; i < nPlayerreverse; ++i) {
+			bool flag = false;
+			for (int j = 0; j < lenReverse[i]; ++j)
+				if (player[j] != playersReverse[i][j]) {
+					flag = true;
+					break;
+				}
+			if (flag == false) {
+				scoresReverse[i] = max(score, scoresReverse[i]);
+				return;
+			}
+		}
+		lenFaker[nPlayerreverse] = cnt;
+		scoresReverse[nPlayerreverse] = score * 100;
+		for (int i = 0; i < cnt; ++i) {
+			playersReverse[nPlayerreverse][i] = player[i];
+		}
+		fReverse = fopen("rankingReverse.txt","w");
+		++nPlayerreverse;
+		for (int i = 0; i < nPlayerreverse; ++i) {
+			for (int j = 0; j < lenReverse[i]; ++j) {
+				fprintf(fReverse, "%c", playersReverse[i][j]);
+			}
+			fprintf(fReverse, " %d\n", scoresReverse[i]);
+		}
+		fclose(fReverse);
+	}
 	changeColor(15);
 }
 
-void win(){
+void win(int score, int mode){
 	clock_t timeS,timeE;//thoi gian xuat hien
 	timeS=clock();
 	do
 	{
 		timeE=clock();
 	}while(timeE-timeS <= 219);
-	set_color("01;36");
-	int x = 30, y = 10;
+	set_color("01;91");
+	removeMap();
+	int x = 25, y = 10;
 	gotoXY(x,y);    printf(" ______________________________________________________________________________");  delay(500);
 	gotoXY(x,y + 1);printf("|                                                                              |"); delay(100);
 	gotoXY(x,y + 2);printf("| YYY      YYY   OOOOO    UUU    UUU   www  www    www  www iiiii NNNN    NNNN |"); delay(100);
@@ -1711,13 +2193,223 @@ void win(){
 	gotoXY(x,y + 7);printf("|      YYY     OOO   OOO   UUU  UUU         wwww  wwww       iii  NNN    NNNN  |");	delay(100);
 	gotoXY(x,y + 8);printf("|      YYY       OOOOO      UUUUUU           www  www       iiiii NNN     NNN  |");	delay(100);
 	gotoXY(x,y + 9);printf("|______________________________________________________________________________|");	delay(100);
-	gotoXY(x + 33,y + 13);printf("PLAY AGAIN!!");
+	gotoXY(x + 33,y + 13);
+	printf("ENTER YOUR NAME : ");
+	
+	char c, player[100];
+	int cnt = 0;
+	if (mode == 1) {
+		while (true) {
+			c = getchar();
+			if (c == ' ') continue;
+			if (c == '\n') break;
+			player[cnt++] = c;
+		}
+		for (int i = 0; i < nPlayereasy; ++i) {
+			bool flag = false;
+			for (int j = 0; j < lenEasy[i]; ++j)
+				if (player[j] != playersEasy[i][j]) {
+					flag = true;
+					break;
+				}
+			if (flag == false) {
+				scoresEasy[i] = max(score, scoresEasy[i]);
+				return;
+			}
+		}
+		lenEasy[nPlayereasy] = cnt;
+		scoresEasy[nPlayereasy] = score * 100;
+		for (int i = 0; i < cnt; ++i) {
+			playersEasy[nPlayereasy][i] = player[i];
+		}
+		fEasy = fopen("rankingEasy.txt","w");
+		++nPlayereasy;
+		for (int i = 0; i < nPlayereasy; ++i) {
+			for (int j = 0; j < lenEasy[i]; ++j) {
+				fprintf(fEasy, "%c", playersEasy[i][j]);
+			}
+			fprintf(fEasy, " %d\n", scoresEasy[i]);
+		}
+		fclose(fEasy);
+	}
+	if (mode == 2) {
+		while (true) {
+			c = getchar();
+			if (c == ' ') continue;
+			if (c == '\n') break;
+			player[cnt++] = c;
+		}
+		for (int i = 0; i < nPlayerhard; ++i) {
+			bool flag = false;
+			for (int j = 0; j < lenHard[i]; ++j)
+				if (player[j] != playersHard[i][j]) {
+					flag = true;
+					break;
+				}
+			if (flag == false) {
+				scoresHard[i] = max(score, scoresHard[i]);
+				return;
+			}
+		}
+		lenHard[nPlayerhard] = cnt;
+		scoresHard[nPlayerhard] = score * 100;
+		for (int i = 0; i < cnt; ++i) {
+			playersHard[nPlayerhard][i] = player[i];
+		}
+		fHard = fopen("rankingHard.txt","w");
+		++nPlayerhard;
+		for (int i = 0; i < nPlayerhard; ++i) {
+			for (int j = 0; j < lenHard[i]; ++j) {
+				fprintf(fHard, "%c", playersHard[i][j]);
+			}
+			fprintf(fHard, " %d\n", scoresHard[i]);
+		}
+		fclose(fHard);
+	}
+	if (mode == 3) {
+		while (true) {
+			c = getchar();
+			if (c == ' ') continue;
+			if (c == '\n') break;
+			player[cnt++] = c;
+		}
+		for (int i = 0; i < nPlayerfaker; ++i) {
+			bool flag = false;
+			for (int j = 0; j < lenFaker[i]; ++j)
+				if (player[j] != playersFaker[i][j]) {
+					flag = true;
+					break;
+				}
+			if (flag == false) {
+				scoresFaker[i] = max(score, scoresFaker[i]);
+				return;
+			}
+		}
+		lenFaker[nPlayerfaker] = cnt;
+		scoresFaker[nPlayerfaker] = score * 100;
+		for (int i = 0; i < cnt; ++i) {
+			playersFaker[nPlayerfaker][i] = player[i];
+		}
+		fFaker = fopen("rankingFaker.txt","w");
+		++nPlayerfaker;
+		for (int i = 0; i < nPlayerfaker; ++i) {
+			for (int j = 0; j < lenFaker[i]; ++j) {
+				fprintf(fFaker, "%c", playersFaker[i][j]);
+			}
+			fprintf(fFaker, " %d\n", scoresFaker[i]);
+		}
+		fclose(fFaker);
+	}
+	if (mode == 4) {
+		while (true) {
+			c = getchar();
+			if (c == ' ') continue;
+			if (c == '\n') break;
+			player[cnt++] = c;
+		}
+		for (int i = 0; i < nPlayerreverse; ++i) {
+			bool flag = false;
+			for (int j = 0; j < lenReverse[i]; ++j)
+				if (player[j] != playersReverse[i][j]) {
+					flag = true;
+					break;
+				}
+			if (flag == false) {
+				scoresReverse[i] = max(score, scoresReverse[i]);
+				return;
+			}
+		}
+		lenFaker[nPlayerreverse] = cnt;
+		scoresReverse[nPlayerreverse] = score * 100;
+		for (int i = 0; i < cnt; ++i) {
+			playersReverse[nPlayerreverse][i] = player[i];
+		}
+		fReverse = fopen("rankingReverse.txt","w");
+		++nPlayerreverse;
+		for (int i = 0; i < nPlayerreverse; ++i) {
+			for (int j = 0; j < lenReverse[i]; ++j) {
+				fprintf(fReverse, "%c", playersReverse[i][j]);
+			}
+			fprintf(fReverse, " %d\n", scoresReverse[i]);
+		}
+		fclose(fReverse);
+	}
+	changeColor(15);
+}
+
+void pacmanWin(){
+	clock_t timeS,timeE;//thoi gian xuat hien
+	timeS=clock();
+	do
+	{
+		timeE=clock();
+	}while(timeE-timeS <= 219);
+	set_color("01;36");
+	removeMap();
+	int x = 60, y = 10;
+	gotoXY(x,y);    printf("          )         )       ) " );      
+	gotoXY(x,y +1);    printf("    )   ( /(   (    (     ( /(   (  ");
+	gotoXY(x,y +2);    printf(" /(/(   )(_))  )\\   )\\  ' )(_))  )\\ ) "); 
+	gotoXY(x,y +3);    printf("((_)_\\ ((_)_  ((_)_((_)) ((_)_  _(_/(  ");
+	gotoXY(x,y +4);    printf("| '_ \\)/ _` |/ _|| '  \\()/ _` || ' \\)) ");
+	gotoXY(x,y +5);    printf("| .__/ \\__,_|\\__||_|_|_| \\__,_||_||_|  ");
+	gotoXY(x,y +6);    printf("|(| (   (                              ");
+	gotoXY(x,y +7);    printf("             )\\))(  )\\   (                         ");
+	gotoXY(x,y +8);    printf("            ((_)()\\((_)  )\\ )                      ");
+	gotoXY(x,y +9);    printf("          _(()(_)(_) _(_/(                      ");
+	gotoXY(x,y +10);    printf("         \\ \V  \V /| || ' \\))                     ");
+	gotoXY(x,y +11);    printf("          \\_/\\_/ |_||_||_| ");
+	gotoXY(x + 10,y + 16);printf("PLAY AGAIN!!");
+	changeColor(15);
+}
+
+void ghostWin(){
+	clock_t timeS,timeE;//thoi gian xuat hien
+	timeS=clock();
+	do
+	{
+		timeE=clock();
+	}while(timeE-timeS <= 219);
+	set_color("01;36");
+	removeMap();
+	int x = 60, y = 10;
+	gotoXY(x,y);    printf(" (          )              ) "); 
+	gotoXY(x,y +1);    printf(" )\\ )    ( /(           ( /(  ");
+	gotoXY(x,y +2);    printf("(()/(    )\\())  (   (   )\\()) ");
+	gotoXY(x,y +3);    printf(" /(_))_ ((_)\\   )\\  )\\ (_))/  ");
+	gotoXY(x,y +4);    printf("(_)) __|| |(_) ((_)((_)| |_   ");
+	gotoXY(x,y +5);    printf("  | (_ || ' \\ / _ \\(_-<|  _|  ");
+	gotoXY(x,y +6);    printf(" (\\ (__||_||_|\\___//__/ \\__|  ");
+	gotoXY(x,y +7);    printf("    )\\))(   ' (                  ");
+	gotoXY(x,y +8);    printf("   ((_)()\\ )  )\\   (             ");
+	gotoXY(x,y +9);    printf("   _(())\\_)()((_)  )\\ )          ");
+	gotoXY(x,y +10);    printf("   \\ \\((_)/ / (_) _(_/(          ");
+	gotoXY(x,y +11);    printf("    \\ \\/\\/ /  | || ' \\))         ");
+	gotoXY(x,y +12);    printf("     \\_/\\_/   |_||_||_|   	");	
+	gotoXY(x + 10,y + 16);printf("PLAY AGAIN!!");
 	changeColor(15);
 }
 
 
 int main(){
 	int choiceMenu = 0;
+	playersEasy = (char **)malloc(100 * sizeof(int *));
+	for (int i = 0; i < 100; ++i) {
+		playersEasy[i] = (char *)malloc(500 * sizeof(int));
+	}
+	playersHard = (char **)malloc(100 * sizeof(int *));
+	for (int i = 0; i < 100; ++i) {
+		playersHard[i] = (char *)malloc(500 * sizeof(int));
+	}
+	playersFaker = (char **)malloc(100 * sizeof(int *));
+	for (int i = 0; i < 100; ++i) {
+		playersFaker[i] = (char *)malloc(500 * sizeof(int));
+	}
+	playersReverse = (char **)malloc(100 * sizeof(int *));
+	for (int i = 0; i < 100; ++i) {
+		playersReverse[i] = (char *)malloc(500 * sizeof(int));
+	}
+	copyData();
 	resizeConsole(1280, 720);
 	Nocursortype();
 	intro();
@@ -1727,6 +2419,5 @@ int main(){
 	frame();
 	printMenu(choiceMenu);
 	system("cls");	
-	win();
 	return 0;
 }
