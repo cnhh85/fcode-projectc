@@ -2034,6 +2034,7 @@ void lose(int score, int mode){
 	
 	char c, player[100];
 	int cnt = 0;
+	score *= 100;
 	if (mode == 1) {
 		while (true) {
 			c = getchar();
@@ -2151,11 +2152,11 @@ void lose(int score, int mode){
 					break;
 				}
 			if (flag == false) {
-				scoresReverse[i] = max(score, scoresReverse[i]);
+				scoresReverse[i] = min(score , scoresReverse[i]);
 				return;
 			}
 		}
-		lenFaker[nPlayerreverse] = cnt;
+		lenReverse[nPlayerreverse] = cnt;
 		scoresReverse[nPlayerreverse] = score * 100;
 		for (int i = 0; i < cnt; ++i) {
 			playersReverse[nPlayerreverse][i] = player[i];
@@ -2198,6 +2199,7 @@ void win(int score, int mode){
 	
 	char c, player[100];
 	int cnt = 0;
+	score *= 100;
 	if (mode == 1) {
 		while (true) {
 			c = getchar();
@@ -2315,11 +2317,11 @@ void win(int score, int mode){
 					break;
 				}
 			if (flag == false) {
-				scoresReverse[i] = max(score, scoresReverse[i]);
+				scoresReverse[i] = min(score, scoresReverse[i]);
 				return;
 			}
 		}
-		lenFaker[nPlayerreverse] = cnt;
+		lenReverse[nPlayerreverse] = cnt;
 		scoresReverse[nPlayerreverse] = score * 100;
 		for (int i = 0; i < cnt; ++i) {
 			playersReverse[nPlayerreverse][i] = player[i];
