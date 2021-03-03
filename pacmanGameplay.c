@@ -3,6 +3,28 @@
 #include <stdbool.h>
 #include <conio.h>
 #include <time.h>
+#include <mmsystem.h>
+
+//AUDIO
+void playTheme() {
+	PlaySound(TEXT(".audio\\theme.wav"), NULL, SND_SYNC | SND_LOOP); //PACMAN THEME
+}
+void playEating() {
+	PlaySound(TEXT(".audio\\eating.wav"), NULL, SND_ASYNC | SND_LOOP); //EATING FOOD
+}
+void playDead() {
+	PlaySound(TEXT(".audio\\dead.wav"), NULL, SND_ASYNC | SND_LOOP); //PACMAN DIES
+}
+void playMenuScroll() {
+	PlaySound(TEXT(".audio\\menuscroll.wav"), NULL, SND_ASYNC | SND_LOOP); //SCROLL MENU
+}
+void playMenuSellect() {
+	PlaySound(TEXT(".audio\\menuselect.wav"), NULL, SND_ASYNC | SND_LOOP); //MENU SELECT
+}
+void playMenuTheme() {
+	PlaySound(TEXT(".audio\\menutheme.wav"), NULL, SND_ASYNC | SND_LOOP); //MENU MUSIC
+}
+
 
 void gotoxy(int x, int y)
 {
