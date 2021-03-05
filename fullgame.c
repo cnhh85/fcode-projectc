@@ -120,14 +120,35 @@ int scoresReverse[500], lenReverse[500];
 char mapCurrent[105][105];
 
 struct point mapLen[5] = {
+	{35, 18},
 	{33, 19},
 	{58, 23},
-	{35, 18},
 };
 
 
 maps[5][105][105] = {
-		{ //33x19
+		{
+	//  1     2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31   32   33   34   35
+		{219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219},  //1
+		{219, ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', 178, ' ', ' ', ' ', 178, 178, 178, 178, ' ', ' ', ' ', ' ', 219},  //2
+		{219, ' ', 178, 178, 178, 178, 178, 178, 178, 178, 178, ' ', 178, ' ', 178, 178, 178, 178, 178, ' ', 178, ' ', ' ', ' ', 178, ' ', ' ', 178, 178, ' ', ' ', 178, 178, 178, 219},  //3
+		{219, ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', 178, ' ', 178, ' ', 178, 178, 178, 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 219},  //4	
+		{219, 178, 178, 178, 178, ' ', 178, 178, 178, 178, 178, ' ', 178, 178, 178, ' ', 178, ' ', 178, ' ', 178, ' ', 178, ' ', ' ', ' ', ' ', 178, 178, ' ', 178, 178, 178, ' ', 219},  //5	
+		{219, ' ', ' ', ' ', 178, ' ', 178, ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', 178, ' ', 178, ' ', 178, ' ', 178, ' ', 178, 178, ' ', 178, 178, ' ', ' ', ' ', ' ', ' ', 219},  //6
+		{219, ' ', 178, ' ', 178, ' ', 178, 178, 178, 178, 178, ' ', 178, ' ', 178, ' ', 178, ' ', ' ', ' ', 178, ' ', 178, ' ', 178, 178, ' ', 178, 178, ' ', 178, ' ', 178, ' ', 219},  //7
+		{219, ' ', 178, 178, 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', 178, ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', 178, 178, ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', 219},  //8
+		{219, ' ', ' ', ' ', ' ', ' ', 178, 178, 178, 178, 178, ' ', 178, ' ', 178, ' ', 178, 178, 178, 178, 178, ' ', 178, 178, 178, 178, 178, 178, 178, ' ', 178, 178, 178, ' ', 219},  //9
+		{219, 178, 178, ' ', 178, ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, 178, ' ', ' ', 219},  //10
+		{219, ' ', ' ', ' ', 178, ' ', ' ', ' ', 178, 178, 178, ' ', 178, 178, 178, ' ', 178, ' ', 178, 178, 178, ' ', 178, 178, 178, ' ', 178, ' ', 178, 178, 178, 178, ' ', 178, 219},  //11
+		{219, ' ', 178, 178, 178, 178, 178, ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', 178, ' ', ' ', ' ', 219},  //12
+		{219, ' ', 178, ' ', ' ', ' ', 178, 178, 178, 178, 178, ' ', 178, ' ', 178, 178, 178, 178, 178, 178, 178, ' ', 178, ' ', 178, ' ', 178, 178, 178, ' ', ' ', ' ', 178, ' ', 219},  //13
+		{219, ' ', 178, ' ', 178, ' ', 178, ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', 178, ' ', 178, ' ', 178, ' ', ' ', ' ', 178, 178, 178, ' ', 219},  //14
+		{219, ' ', ' ', ' ', 178, ' ', 178, ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', 178, ' ', 178, ' ', 178, ' ', ' ', ' ', 178, 178, 178, ' ', 219},  //14
+		{219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219},  //18
+		//18 x 35
+	},
+	
+	{ //33x19
 		{219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219}, //1
 		{219, ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', 219}, //2
 		{219, ' ', ' ', 178, ' ', 178, ' ', 178, 178, 178, 178, 178, 178, ' ', 178, ' ', 178, ' ', 178, ' ', 178, 178, 178, 178, 178, 178, ' ', 178, ' ', 178, ' ', ' ', 219}, //3
@@ -172,26 +193,7 @@ maps[5][105][105] = {
 		{219,   ' ',   ' ',   ' ',   ' ',   178,   ' ',   ' ',   ' ',   ' ',   ' ',' ',' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 178, 178, 178, 178,   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ',   ' ', 219},				
 		{219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219 ,219}
 	},
-	{
-	//  1     2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31   32   33   34   35
-		{219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219},  //1
-		{219, ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', 178, ' ', ' ', ' ', 178, 178, 178, 178, ' ', ' ', ' ', ' ', 219},  //2
-		{219, ' ', 178, 178, 178, 178, 178, 178, 178, 178, 178, ' ', 178, ' ', 178, 178, 178, 178, 178, ' ', 178, ' ', ' ', ' ', 178, ' ', ' ', 178, 178, ' ', ' ', 178, 178, 178, 219},  //3
-		{219, ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', 178, ' ', 178, ' ', 178, 178, 178, 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 219},  //4	
-		{219, 178, 178, 178, 178, ' ', 178, 178, 178, 178, 178, ' ', 178, 178, 178, ' ', 178, ' ', 178, ' ', 178, ' ', 178, ' ', ' ', ' ', ' ', 178, 178, ' ', 178, 178, 178, ' ', 219},  //5	
-		{219, ' ', ' ', ' ', 178, ' ', 178, ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', 178, ' ', 178, ' ', 178, ' ', 178, ' ', 178, 178, ' ', 178, 178, ' ', ' ', ' ', ' ', ' ', 219},  //6
-		{219, ' ', 178, ' ', 178, ' ', 178, 178, 178, 178, 178, ' ', 178, ' ', 178, ' ', 178, ' ', ' ', ' ', 178, ' ', 178, ' ', 178, 178, ' ', 178, 178, ' ', 178, ' ', 178, ' ', 219},  //7
-		{219, ' ', 178, 178, 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', 178, ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', 178, 178, ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', 219},  //8
-		{219, ' ', ' ', ' ', ' ', ' ', 178, 178, 178, 178, 178, ' ', 178, ' ', 178, ' ', 178, 178, 178, 178, 178, ' ', 178, 178, 178, 178, 178, 178, 178, ' ', 178, 178, 178, ' ', 219},  //9
-		{219, 178, 178, ' ', 178, ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, 178, ' ', ' ', 219},  //10
-		{219, ' ', ' ', ' ', 178, ' ', ' ', ' ', 178, 178, 178, ' ', 178, 178, 178, ' ', 178, ' ', 178, 178, 178, ' ', 178, 178, 178, ' ', 178, ' ', 178, 178, 178, 178, ' ', 178, 219},  //11
-		{219, ' ', 178, 178, 178, 178, 178, ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', 178, ' ', ' ', ' ', 219},  //12
-		{219, ' ', 178, ' ', ' ', ' ', 178, 178, 178, 178, 178, ' ', 178, ' ', 178, 178, 178, 178, 178, 178, 178, ' ', 178, ' ', 178, ' ', 178, 178, 178, ' ', ' ', ' ', 178, ' ', 219},  //13
-		{219, ' ', 178, ' ', 178, ' ', 178, ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', 178, ' ', 178, ' ', 178, ' ', ' ', ' ', 178, 178, 178, ' ', 219},  //14
-		{219, ' ', ' ', ' ', 178, ' ', 178, ' ', ' ', ' ', ' ', ' ', 178, ' ', ' ', ' ', ' ', ' ', ' ', ' ', 178, ' ', 178, ' ', 178, ' ', 178, ' ', ' ', ' ', 178, 178, 178, ' ', 219},  //14
-		{219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219, 219},  //18
-		//18 x 35
-	},
+
 };
 
 
@@ -247,7 +249,7 @@ void copyData() {
 			ok = false;
 		}
 	}	
-	sortInc(&scoresEasy, playersEasy, &lenEasy, nPlayereasy);
+	sortDec(&scoresEasy, playersEasy, &lenEasy, nPlayereasy);
 	fclose(fEasy);
 	
 	fHard = fopen("rankingHard.txt","r");
@@ -265,7 +267,7 @@ void copyData() {
 			ok = false;
 		}
 	}	
-	sortInc(&scoresHard, playersHard, &lenHard, nPlayerhard);
+	sortDec(&scoresHard, playersHard, &lenHard, nPlayerhard);
 	fclose(fHard);
 	
 	fFaker = fopen("rankingFaker.txt","r");
@@ -283,7 +285,7 @@ void copyData() {
 			ok = false;
 		}
 	}	
-	sortInc(&scoresFaker, playersFaker, &lenFaker, nPlayerfaker);
+	sortDec(&scoresFaker, playersFaker, &lenFaker, nPlayerfaker);
 	fclose(fFaker);
 	
 	fReverse = fopen("rankingReverse.txt","r");
@@ -301,7 +303,7 @@ void copyData() {
 			ok = false;
 		}
 	}	
-	sortDec(&scoresReverse, playersReverse, &lenReverse, nPlayerreverse);
+	sortInc(&scoresReverse, playersReverse, &lenReverse, nPlayerreverse);
 	fclose(fReverse);
 }
 
@@ -366,19 +368,19 @@ void initCharacter(struct character *pacman, struct character *ghost) {
 }
 
 void changeDirect(struct character *chacr, char key) {
-	if (key == 'W' || key == 'w' || key == 72) (*chacr).direct = UP;
-	if (key == 'S' || key == 's' || key == 80) (*chacr).direct = DOWN;
-	if (key == 'a' || key == 'A' || key == 75) (*chacr).direct = LEFT;
-	if (key == 'd' || key == 'D' || key == 77) (*chacr).direct = RIGHT;
+	if (key == 'W' || key == 'w' || key == 'I' || key == 'i') (*chacr).direct = UP;
+	if (key == 'S' || key == 's' || key == 'k' || key == 'K') (*chacr).direct = DOWN;
+	if (key == 'a' || key == 'A' || key == 'j' || key == 'J') (*chacr).direct = LEFT;
+	if (key == 'd' || key == 'D' || key == 'l' || key == 'L') (*chacr).direct = RIGHT;
 }
 
 void showBuffer() {
 	changeColorr(2);
 	int x, y = 10;
-	if (mapChoice == 1) y = 5;
+	if (mapChoice == 2) y = 5;
 	for (int i = 0; i <= consoleHeight; ++i) {
 		x = 50;
-		if (mapChoice == 1) x = 37;
+		if (mapChoice == 2) x = 37;
 		for (int j = 0; j <= consoleWidth; ++j) {
 			gotoxy(x, y);
 			if (buffer[i][j] == -108 || buffer[i][j] == 11 || buffer[i][j] == 12 || buffer[i][j] == 15) {
@@ -671,9 +673,9 @@ void modeEasy(int speedCus,bool custom) {
 	score = 0;
 	preScore = 0;
 	timeGame = 0;
-	if (mapChoice == 0) nFood = 300;
-	if (mapChoice == 1) nFood = 500;
-	if (mapChoice == 2) nFood = 200;
+	if (mapChoice == 0) nFood = 240;
+	if (mapChoice == 1) nFood = 300;
+	if (mapChoice == 2) nFood = 500;
 	loseGame = winGame = false;
 	struct character pacman;
 	struct character ghosts[nGhost];
@@ -818,9 +820,9 @@ void modeHard(int speedCus,bool custom) {
 	score = 0;
 	preScore = 0;
 	timeGame = 0;
-	if (mapChoice == 0) nFood = 300;
-	if (mapChoice == 1) nFood = 500;
-	if (mapChoice == 2) nFood = 200;
+	if (mapChoice == 0) nFood = 240;
+	if (mapChoice == 1) nFood = 300;
+	if (mapChoice == 2) nFood = 500;
 	loseGame = winGame = false;
 	struct character pacman;
 	struct character ghosts[nGhost];
@@ -961,9 +963,9 @@ void modeFaker(int speedCus,bool custom) {
 	score = 0;
 	timeGame = 0;
 	preScore = 0;
-	if (mapChoice == 0) nFood = 300;
-	if (mapChoice == 1) nFood = 500;
-	if (mapChoice == 2) nFood = 200;
+	if (mapChoice == 0) nFood = 240;
+	if (mapChoice == 1) nFood = 300;
+	if (mapChoice == 2) nFood = 500;
 	loseGame = winGame = false;
 	struct character pacman;
 	struct character ghosts[nGhost];
@@ -1108,9 +1110,9 @@ void modeTwoplayers(int speedCus,bool custom) {
 	if (custom) setting(speedCus);
 	removeMap();
 	nGhost = 1;
-	if (mapChoice == 0) nFood = 300;
-	if (mapChoice == 1) nFood = 500;
-	if (mapChoice == 2) nFood = 200;
+	if (mapChoice == 0) nFood = 240;
+	if (mapChoice == 1) nFood = 300;
+	if (mapChoice == 2) nFood = 500;
 	timeGame = 0;
 	int scorePacman = 0 , prescorePacman = 0;
 	int scoreGhost = 0 , prescoreGhost = 0;
@@ -1240,9 +1242,9 @@ void modeReverse(int speedCus,bool custom) {
 	preScore = 0;
 	timeGame = 0;
 	loseGame = winGame = false;
-	if (mapChoice == 0) nFood = 300;
-	if (mapChoice == 1) nFood = 500;
-	if (mapChoice == 2) nFood = 200;
+	if (mapChoice == 0) nFood = 240;
+	if (mapChoice == 1) nFood = 300;
+	if (mapChoice == 2) nFood = 500;
 	struct character pacman;
 	struct character ghosts[nGhost];
 	initMap(mapChoice);
@@ -1466,12 +1468,16 @@ void framePlay(){
 		gotoXY(x+ 119,y + j);printf("%c", 186);
 	}
 	gotoXY(x,y+j);printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c",200, 205, 205, 205, 205, 205,205, 205, 205, 205, 205, 205,205, 205, 205, 205, 205, 205,205, 205, 205, 205, 205, 205,205, 205, 205, 205, 205, 205,205, 205, 205, 205, 205, 205,205, 205, 205, 205, 205, 205,205, 205, 205, 205, 205, 205,205, 205, 205, 205, 205, 205,205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205,205, 205, 205, 205, 205, 205,205, 205, 205, 205, 205, 205,205, 205, 205, 205, 205, 205,205, 205, 205, 205, 205, 205,202 ,205, 205, 205, 205, 205,205, 205, 205, 205, 205, 205,205, 205, 205, 205, 205, 205,205, 205, 205, 205, 205, 205,205, 205, 205, 205, 205, 188);
-	gotoXY( 115, 6);
-	printf("Help: Use WASD to MOVE");
-	gotoXY( 115, 7);
+	gotoXY( 113, 29);
+	printf("Help:");
+	changeColor(5);
+	gotoXY( 113, 30);
+	printf("Use WASD and JIKL to MOVE");
+	gotoXY( 113, 31);
 	printf("EAT * to win");
-
-	
+	gotoXY( 113, 32);
+	printf("EAT F to get the POWER");
+	changeColor(12);
 	
 	if (modeGame == 1) {
 		
@@ -2028,15 +2034,16 @@ void showRanking(int choice) {
 	gotoXY(x,y-4);    printf(" //   | |  //   / / //   / / //  \\ \\   / / //   / / ((___/ /  ");
 	gotoXY(x,y-3);    printf("//    | | ((__( ( //   / / //    \\ \\ / / //   / /   //_    ");
 	changeColor(15);
-	y = 18, x = 70;
+	y = 18, x = 66;
 	gotoXY(x, y);
-	printf("Users          Scores");
+	printf("Top     Users          Scores");
 	y += 3;
 	if (choice == 1) {
 		for (int i = 0; i < min(5, nPlayereasy); ++i) {
 			gotoXY(x, y);
+			printf("%d        ", i + 1);
 			for (int j = 0; j < lenEasy[i]; ++j) printf("%c", playersEasy[i][j]);
-			for (int j = 0; j < 16 - lenEasy[i]; ++j) printf(" ");
+			for (int j = 0; j < 15 - lenEasy[i]; ++j) printf(" ");
 			printf(" %d", scoresEasy[i]);
 			++y;
 		}
@@ -2054,8 +2061,9 @@ void showRanking(int choice) {
 	if (choice == 2) {
 		for (int i = 0; i < min(5, nPlayerhard); ++i) {
 			gotoXY(x, y);
+			printf("%d       ", i + 1);
 			for (int j = 0; j < lenHard[i]; ++j) printf("%c", playersHard[i][j]);
-			for (int j = 0; j < 16 - lenHard[i]; ++j) printf(" ");
+			for (int j = 0; j < 15 - lenHard[i]; ++j) printf(" ");
 			printf(" %d", scoresHard[i]);
 			++y;
 		}
@@ -2073,8 +2081,9 @@ void showRanking(int choice) {
 	if (choice == 3) {
 		for (int i = 0; i < min(5, nPlayerfaker); ++i) {
 			gotoXY(x, y);
+			printf("%d       ", i + 1);
 			for (int j = 0; j < lenFaker[i]; ++j) printf("%c", playersFaker[i][j]);
-			for (int j = 0; j < 16 - lenFaker[i]; ++j) printf(" ");
+			for (int j = 0; j < 15 - lenFaker[i]; ++j) printf(" ");
 			printf(" %d", scoresFaker[i]);
 			++y;
 		}
@@ -2092,8 +2101,9 @@ void showRanking(int choice) {
 	if (choice == 4) {
 		for (int i = 0; i < min(5, nPlayerreverse); ++i) {
 			gotoXY(x, y);
+			printf("%d       ", i + 1);
 			for (int j = 0; j < lenReverse[i]; ++j) printf("%c", playersReverse[i][j]);
-			for (int j = 0; j < 16 - lenReverse[i]; ++j) printf(" ");
+			for (int j = 0; j < 15 - lenReverse[i]; ++j) printf(" ");
 			printf(" %d", scoresReverse[i]);
 			++y;
 		}
@@ -2136,7 +2146,6 @@ void lose(int score, int mode){
 	
 	char c, player[100];
 	int cnt = 0;
-	score *= 100;
 	if (mode == 1) {
 		while (true) {
 			c = getchar();
