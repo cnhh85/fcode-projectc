@@ -16,13 +16,13 @@ void playDead() {
 	PlaySound(TEXT(".\\audio\\dead.wav"), NULL, SND_SYNC  | SND_LOOP); //PACMAN DIES
 }
 void playMenuScroll() {
-	PlaySound(TEXT(".\\audio\\menuscroll.wav"), NULL, SND_ASYNC); //SCROLL MENU
+	PlaySound(TEXT(".\\audio\\menuscroll.wav"), NULL, SND_ASYNC ); //SCROLL MENU
 }
 void playMenuSellect() {
 	PlaySound(TEXT(".\\audio\\menuselect.wav"), NULL, SND_ASYNC); //MENU SELECT
 }
 void playMenuTheme() {
-	PlaySound(TEXT(".\\audio\\menutheme.wav"), NULL, SND_SYNC  | SND_LOOP); //MENU MUSIC
+	PlaySound(TEXT(".\\audio\\menutheme.wav"), NULL, SND_ASYNC); //MENU MUSIC
 }
 
 void pauseSound() {
@@ -320,8 +320,8 @@ void initMap(int mapIndex) {
 }
 
 void removeMap() {
-	for (int i = 0; i < 60; ++i)
-		for (int j = 0; j < 40; ++j)
+	for (int i = 0; i < 100; ++i)
+		for (int j = 0; j < 100; ++j)
 			buffer[i][j] = ' ';
 }
 
@@ -1889,6 +1889,7 @@ void skin(int choiceMenu){
 
 //****MENU***///
 int printMenu(int choiceMenu){	
+	if (choiceMenu == 0) playMenuTheme();
 	pacmanSkin = 0;
 	mapChoice = 0;
 	int enterMenu = 0, y = 18 ;
@@ -2015,7 +2016,7 @@ void ranking(int choiceMenu) {
 				system("cls");
 				frame();
 				printMenuBanner();
-				printMenu(4);
+				printMenu(0);
 				return;
 			}
 			ranking(choiceMenu);
