@@ -249,7 +249,6 @@ void copyData() {
 			ok = false;
 		}
 	}	
-	sortDec(&scoresEasy, playersEasy, &lenEasy, nPlayereasy);
 	fclose(fEasy);
 	
 	fHard = fopen("rankingHard.txt","r");
@@ -267,7 +266,6 @@ void copyData() {
 			ok = false;
 		}
 	}	
-	sortDec(&scoresHard, playersHard, &lenHard, nPlayerhard);
 	fclose(fHard);
 	
 	fFaker = fopen("rankingFaker.txt","r");
@@ -285,7 +283,6 @@ void copyData() {
 			ok = false;
 		}
 	}	
-	sortDec(&scoresFaker, playersFaker, &lenFaker, nPlayerfaker);
 	fclose(fFaker);
 	
 	fReverse = fopen("rankingReverse.txt","r");
@@ -303,7 +300,6 @@ void copyData() {
 			ok = false;
 		}
 	}	
-	sortInc(&scoresReverse, playersReverse, &lenReverse, nPlayerreverse);
 	fclose(fReverse);
 }
 
@@ -2040,6 +2036,7 @@ void showRanking(int choice) {
 	printf("Top     Users          Scores");
 	y += 3;
 	if (choice == 1) {
+		sortDec(&scoresEasy, playersEasy, &lenEasy, nPlayereasy);
 		for (int i = 0; i < min(5, nPlayereasy); ++i) {
 			gotoXY(x, y);
 			printf("%d        ", i + 1);
@@ -2060,6 +2057,7 @@ void showRanking(int choice) {
 		}
 	}
 	if (choice == 2) {
+		sortDec(&scoresHard, playersHard, &lenHard, nPlayerhard);
 		for (int i = 0; i < min(5, nPlayerhard); ++i) {
 			gotoXY(x, y);
 			printf("%d       ", i + 1);
@@ -2080,6 +2078,7 @@ void showRanking(int choice) {
 		}
 	}
 	if (choice == 3) {
+		sortDec(&scoresFaker, playersFaker, &lenFaker, nPlayerfaker);
 		for (int i = 0; i < min(5, nPlayerfaker); ++i) {
 			gotoXY(x, y);
 			printf("%d       ", i + 1);
@@ -2100,6 +2099,7 @@ void showRanking(int choice) {
 		}
 	}
 	if (choice == 4) {
+		sortInc(&scoresReverse, playersReverse, &lenReverse, nPlayerreverse);
 		for (int i = 0; i < min(5, nPlayerreverse); ++i) {
 			gotoXY(x, y);
 			printf("%d       ", i + 1);
