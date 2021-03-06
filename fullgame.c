@@ -343,7 +343,10 @@ void initCharacter(struct character *pacman, struct character *ghost) {
 	
 	for (int i = 0; i < nGhost; ++i) {
 		(*(ghost + i)).shape = -114;
-		(*(ghost + i)).competitorShape = -108;
+		if (pacmanSkin == 0) (*(ghost + i)).competitorShape = -108;
+		if (pacmanSkin == 1) (*(ghost + i)).competitorShape = 11;
+		if (pacmanSkin == 2) (*(ghost + i)).competitorShape = 12;
+		if (pacmanSkin == 3) (*(ghost + i)).competitorShape = 15;
 		(*(ghost + i)).pos.x = consoleHeight - 4;
 		(*(ghost + i)).pos.y = consoleWidth - 6;
 		(*(ghost + i)).direct = STOP;
@@ -738,7 +741,7 @@ void modeEasy(int speedCus,bool custom) {
 			changeColorr(rand() % 16);
 			preScore = score;
 		}
-		printf("Score : %d", score * 100);
+		printf("Score : %d", score * 10);
 		
 		// CONTROL--------------------------------
 		
@@ -886,7 +889,7 @@ void modeHard(int speedCus,bool custom) {
 			changeColorr(rand() % 16);
 			preScore = score;
 		}
-		printf("Score : %d", score * 100);
+		printf("Score : %d", score * 10);
 		
 		
 		// CONTROL--------------------------------
@@ -1029,7 +1032,7 @@ void modeFaker(int speedCus,bool custom) {
 			changeColorr(rand() % 16);
 			preScore = score;
 		}
-		printf("Score : %d", score * 100);
+		printf("Score : %d", score * 10);
 		
 		// CONTROL--------------------------------
 		
@@ -1106,7 +1109,7 @@ void modeTwoplayers(int speedCus,bool custom) {
 	if (custom) setting(speedCus);
 	removeMap();
 	nGhost = 1;
-	if (mapChoice == 0) nFood = 240;
+	if (mapChoice == 0) nFood = 260;
 	if (mapChoice == 1) nFood = 300;
 	if (mapChoice == 2) nFood = 500;
 	timeGame = 0;
@@ -1125,7 +1128,7 @@ void modeTwoplayers(int speedCus,bool custom) {
 	while (true) {
 		
 		// CHECK ENDGAME-------------------------
-	
+		if (scorePacman + scoreGhost == nFood) winGame = true;
 		if (winGame == true) {
 			//system("cls");
 			gotoxy(55,8);
@@ -1179,7 +1182,7 @@ void modeTwoplayers(int speedCus,bool custom) {
 			changeColorr(rand() % 16);
 			prescoreGhost = scoreGhost;
 		}
-		printf("Pacman score : %d", scoreGhost * 10);
+		printf("Ghost score : %d", scoreGhost * 10);
 		
 		// CONTROL--------------------------------
 		
@@ -1415,6 +1418,7 @@ void intro(){
 	gotoXY(x,y + 13);printf("P::::::::P  A:::::A               A:::::ACC:::::::::::::::CM::::::M               M::::::M  A:::::A               A:::::A  N::::::N       N:::::::N");	delay(100);
 	gotoXY(x,y + 14);printf("P::::::::P A:::::A                 A:::::A CCC::::::::::::CM::::::M               M::::::M A:::::A                 A:::::A N::::::N        N::::::N");	delay(100);
 	gotoXY(x,y + 15);printf("PPPPPPPPPPAAAAAAA                   AAAAAAA   CCCCCCCCCCCCCMMMMMMMM               MMMMMMMMAAAAAAA                   AAAAAAANNNNNNNN         NNNNNNN");	delay(100);
+	delay(2800);
 	changeColor(15);
 	timeS=clock();
 	do{
@@ -2167,7 +2171,7 @@ void lose(int score, int mode){
 			}
 		}
 		lenEasy[nPlayereasy] = cnt;
-		scoresEasy[nPlayereasy] = score * 100;
+		scoresEasy[nPlayereasy] = score * 10;
 		for (int i = 0; i < cnt; ++i) {
 			playersEasy[nPlayereasy][i] = player[i];
 		}
@@ -2201,12 +2205,12 @@ void lose(int score, int mode){
 			}
 		}
 		lenHard[nPlayerhard] = cnt;
-		scoresHard[nPlayerhard] = score * 100;
+		scoresHard[nPlayerhard] = score * 10;
 		for (int i = 0; i < cnt; ++i) {
 			playersHard[nPlayerhard][i] = player[i];
 		}
-		fHard = fopen("rankingHard.txt","w");
 		++nPlayerhard;
+		fHard = fopen("rankingHard.txt","w");
 		for (int i = 0; i < nPlayerhard; ++i) {
 			for (int j = 0; j < lenHard[i]; ++j) {
 				fprintf(fHard, "%c", playersHard[i][j]);
@@ -2235,7 +2239,7 @@ void lose(int score, int mode){
 			}
 		}
 		lenFaker[nPlayerfaker] = cnt;
-		scoresFaker[nPlayerfaker] = score * 100;
+		scoresFaker[nPlayerfaker] = score * 10;
 		for (int i = 0; i < cnt; ++i) {
 			playersFaker[nPlayerfaker][i] = player[i];
 		}
@@ -2269,7 +2273,7 @@ void lose(int score, int mode){
 			}
 		}
 		lenReverse[nPlayerreverse] = cnt;
-		scoresReverse[nPlayerreverse] = score * 100;
+		scoresReverse[nPlayerreverse] = score * 10;
 		for (int i = 0; i < cnt; ++i) {
 			playersReverse[nPlayerreverse][i] = player[i];
 		}
@@ -2311,7 +2315,6 @@ void win(int score, int mode){
 	
 	char c, player[100];
 	int cnt = 0;
-	score *= 100;
 	if (mode == 1) {
 		while (true) {
 			c = getchar();
@@ -2332,7 +2335,7 @@ void win(int score, int mode){
 			}
 		}
 		lenEasy[nPlayereasy] = cnt;
-		scoresEasy[nPlayereasy] = score * 100;
+		scoresEasy[nPlayereasy] = score * 10;
 		for (int i = 0; i < cnt; ++i) {
 			playersEasy[nPlayereasy][i] = player[i];
 		}
@@ -2366,7 +2369,7 @@ void win(int score, int mode){
 			}
 		}
 		lenHard[nPlayerhard] = cnt;
-		scoresHard[nPlayerhard] = score * 100;
+		scoresHard[nPlayerhard] = score * 10;
 		for (int i = 0; i < cnt; ++i) {
 			playersHard[nPlayerhard][i] = player[i];
 		}
@@ -2400,7 +2403,7 @@ void win(int score, int mode){
 			}
 		}
 		lenFaker[nPlayerfaker] = cnt;
-		scoresFaker[nPlayerfaker] = score * 100;
+		scoresFaker[nPlayerfaker] = score * 10;
 		for (int i = 0; i < cnt; ++i) {
 			playersFaker[nPlayerfaker][i] = player[i];
 		}
@@ -2434,7 +2437,7 @@ void win(int score, int mode){
 			}
 		}
 		lenReverse[nPlayerreverse] = cnt;
-		scoresReverse[nPlayerreverse] = score * 100;
+		scoresReverse[nPlayerreverse] = score * 10;
 		for (int i = 0; i < cnt; ++i) {
 			playersReverse[nPlayerreverse][i] = player[i];
 		}
@@ -2460,7 +2463,7 @@ void pacmanWin(){
 	}while(timeE-timeS <= 219);
 	set_color("01;36");
 	removeMap();
-	int x = 60, y = 10;
+	int x = 52, y = 10;
 	gotoXY(x,y);    printf("          )         )       ) " );      
 	gotoXY(x,y +1);    printf("    )   ( /(   (    (     ( /(   (  ");
 	gotoXY(x,y +2);    printf(" /(/(   )(_))  )\\   )\\  ' )(_))  )\\ ) "); 
@@ -2486,7 +2489,7 @@ void ghostWin(){
 	}while(timeE-timeS <= 219);
 	set_color("01;36");
 	removeMap();
-	int x = 60, y = 10;
+	int x = 52, y = 10;
 	gotoXY(x,y);    printf(" (          )              ) "); 
 	gotoXY(x,y +1);    printf(" )\\ )    ( /(           ( /(  ");
 	gotoXY(x,y +2);    printf("(()/(    )\\())  (   (   )\\()) ");
