@@ -127,6 +127,7 @@ char mapCurrent[105][105];
 
 struct point mapLen[5] = {
 	{35, 18},
+
 	{33, 19},
 	{58, 23},
 };
@@ -201,7 +202,6 @@ maps[5][105][105] = {
 	},
 
 };
-
 
 
 void sortInc(int *score, char **players, int *len, int n) {
@@ -322,8 +322,10 @@ void initMap(int mapIndex) {
 }
 
 void removeMap() {
+
 	for (int i = 0; i < 100; ++i)
 		for (int j = 0; j < 100; ++j)
+
 			buffer[i][j] = ' ';
 }
 
@@ -355,7 +357,6 @@ void initCharacter(struct character *pacman, struct character *ghost) {
 		if (pacmanSkin == 3) (*(ghost + i)).competitorShape = 15;
 		(*(ghost + i)).pos.x = consoleHeight - 4;
 		(*(ghost + i)).pos.y = consoleWidth - 6;
-		(*(ghost + i)).direct = STOP;
 	}
 	
 	// INIT FOOD----------------------------------------------------
@@ -438,7 +439,6 @@ void checkFood(struct character *chart, int *score) {
 	}
 	if (buffer[(*chart).pos.x - 1][(*chart).pos.y] == '*' && (*chart).direct == UP) {
 		if ((*chart).shape != -114 && (move[(int) (*chart).direct].x != 0 ||  move[(int) (*chart).direct].y != 0)) playEating();
-		mapCurrent[(*chart).pos.x - 1][(*chart).pos.y] = ' ';
 		++ *score;
 	}
 	if (buffer[(*chart).pos.x][(*chart).pos.y + 1] == '*' && (*chart).direct == RIGHT) {
@@ -612,7 +612,7 @@ void solveGhost(struct character *ghost) {
 void moveCharacter(struct character *chart) {
 	(*chart).pos.x += move[(int) (*chart).direct].x;
 	(*chart).pos.y += move[(int) (*chart).direct].y;
-	
+
 }
 
 void findPacman(struct character *ghost,struct character *pacman) {
@@ -2500,7 +2500,7 @@ void ghostWin(){
 	playWin();
 	set_color("01;36");
 	removeMap();
-	int x = 52, y = 10;
+	int x = 52, y = 10;n
 	gotoXY(x,y);    printf(" (          )              ) "); 
 	gotoXY(x,y +1);    printf(" )\\ )    ( /(           ( /(  ");
 	gotoXY(x,y +2);    printf("(()/(    )\\())  (   (   )\\()) ");
@@ -2543,7 +2543,7 @@ int main(){
 	Nocursortype();
 	intro();
 	Nocursortype();
-	system("cls");// làm sach màn hinh
+	system("cls");// lÃ m sach mÃ n hinh
 	printMenuBanner();
 	frame();
 	printMenu(choiceMenu);
